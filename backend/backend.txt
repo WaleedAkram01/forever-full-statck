@@ -1,0 +1,4 @@
+1-Firstly,would make server.js file.
+2-npm init -y
+3-Then,install packages
+npm i cors dotenv express jsonwebtoken mongoose multer nodemon stripe validator cloudinary bcrypt 

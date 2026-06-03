@@ -1,0 +1,35 @@
+What you need to do to set up the frontend of your project:
+1-npm create vite@latest 
+2-Install dependencies: npm install
+3-install packages: npm install react-router-dom, react-toastify
+
+*****Tailiwindcss setup:*****
+4-Install tailiwindcss: npm install -D tailwindcss postcss autoprefixer
+5-Initialize tailwindcss: npx tailwindcss init -p
+6-Configure tailwindcss: Open the tailwind.config.js file and add the following content:
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+7-Add Tailwind directives to your CSS: Open the src/index.css file and add the following content:
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+*******************************************
+
+
+
+****************
+After 1 hour 
+1-We added custom fonts- google fonts=Outfit,Prata
+and use import from there
+and pastte in index.css
+
+2-Then-We will add contextFolder where we will add common variables.
+3-THen LatestCollecion componenet and Title.jsx

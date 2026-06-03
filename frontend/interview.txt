@@ -1,0 +1,8 @@
+NavLink vs Link vs a tag
+
+In React Router, there are three main components used for navigation: NavLink, Link, and the standard HTML anchor tag (a). Each serves a different purpose:
+
+1- NavLink:-Iss sy na use hota hai jab hume kisi link ko active state deni hoti hai. Jab user us link par hota hai, to NavLink automatically us link ko active class de deta hai, jisse hum CSS ke through styling kar sakte hain.
+
+2-Link:- Iss sy na usr aik page syy dusry mai navigate krr skta  hai lain na iss sy active state nhi hoti hai. Iss mai simply page reload nhii hota hai aur performance better hoti hai.
+But anchor tag sy page reload hota hai aur performance kharab hoti hai.

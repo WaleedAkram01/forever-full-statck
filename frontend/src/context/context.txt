@@ -1,0 +1,6 @@
+Now with context folder we will be able to store all the common variables and state variables at one place.
+
+
+In video:- 3:25 hr
+
+Hm na add to card button prr click karain gyy tou woo context file mai state variable mai add ho jayega aur jahan jahan bhi cart ki information chahiye hogi wahan context file se access kiya ja sakta hai.

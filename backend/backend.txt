@@ -2,3 +2,30 @@
 2-npm init -y
 3-Then,install packages
 npm i cors dotenv express jsonwebtoken mongoose multer nodemon stripe validator cloudinary bcrypt 
+
+**********Purposse of all the Packages.*************
+cors->whith this we can alow fronet to access backend
+dotenv->we can use .env file to store sensitive data like database url,secret key etc
+express->we can create server and handle routes
+jsonwebtoken->we can create and verify token(enable authentication and authorization)
+mongoose->we can connect to mongodb and create schema and model
+multer->we can handle file upload
+nodemon->we can automatically restart server when we make changes
+stripe->we can handle payment
+validator->we can validate user input
+cloudinary->we can upload image to cloudinary and get url
+bcrypt->we can hash password and compare password
+
+
+**********Then create folders,***************
+
+config->we can store database connection and cloudinary configuration
+middleware->we can store middleware like authentication and error handling
+models->we can store mongoose schema and model
+controllers->we can store controller functions for handling routes
+routes->we willmanage express routes
+
+
+Then,
+in package.json add type: "module" it allows uss to use import and export statements.
+

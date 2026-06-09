@@ -29,3 +29,8 @@ routes->we willmanage express routes
 Then,
 in package.json add type: "module" it allows uss to use import and export statements.
 
+
+Important,Interview Questions:
+What is purpose 0.0.0.0/0 in mongodb atlas?
+Answer:
+0.0.0.0/0 allows any internet connection to try to access your cluster.This is perfect for development because your app won't block you when your home internet IP changes.

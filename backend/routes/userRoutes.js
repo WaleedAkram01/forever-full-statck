@@ -11,6 +11,6 @@ userRouter.post("/login", login);
 // Route for user registration
 userRouter.post("/register", registration);
 // Route for admin login
-userRouter.post("/admin-login", adminLogin);
+userRouter.post("/admin", adminLogin);
 
 export default userRouter;

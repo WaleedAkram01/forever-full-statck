@@ -85,6 +85,38 @@ const registration = async (req, res) => {
 };
 
 // Route for admin login
-const adminLogin = async (req, res) => {};
+// Now ,here  we will create admin authentication system
+// First in .env add admin email and password
+const adminLogin = async (req, res) => {
+  try {
+    // Yeh user ny joo credentials enter kiay hain.
+    const { email, password } = req.body;
+
+    // Matching credentials with our .env credentials
+    if (
+      email === process.env.ADMIN_EMAIL &&
+      password === process.env.ADMIN_PASSWORD
+    ) {
+      // If credentials match, then generate token (object ki tarah pass karna best hai)
+      const token = jwt.sign(email + password, process.env.JWT_SECRET);
+
+      return res.status(200).json({
+        success: true,
+        token,
+      });
+    } else {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 export { login, registration, adminLogin };

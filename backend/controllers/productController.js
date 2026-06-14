@@ -4,6 +4,9 @@ import { productModel } from "../models/productModel.js";
 // We will make 4 controler functions here
 // -create product , -getAllproduct, -getSingleProduct, -remove product
 // function for add product
+
+// What we learnt in this function:-
+// To handle Images through multer and other stuff .
 const addProduct = async (req, res) => {
   // To add a product
   // We will create a middleWare using multer here so if we pass any file using formData it should pass through multer.
@@ -81,17 +84,57 @@ const addProduct = async (req, res) => {
     res.json({ success: true, message: "Product Added" });
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 // fucnction for list product
-const listProducts = async (req, res) => {};
+const listProducts = async (req, res) => {
+  try {
+    const products = await productModel.find();
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // function for removing product
-const removeProduct = async (req, res) => {};
+// Product differnet ways syy del hoo skti hai But hmm req.body syy delete karain gyy brother.
+const removeProduct = async (req, res) => {
+  try {
+    const { id } = req.body;
 
-//function for single product infor
-const singleProduct = async (req, res) => {};
+    // 1. findByIdAndDelete use karein aur await lagayein
+    const product = await productModel.findByIdAndDelete(id);
+
+    // 2. Check karein agar product database mai mila hi nahi
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res
+      .status(200)
+      .json({ success: true, message: "Product deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// function for single product info
+const singleProduct = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    const product = await productModel.findById(productId);
+    res.json({ success: true, product });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 export { addProduct, listProducts, removeProduct, singleProduct };

@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import { productModel } from "../models/productModel.js";
 
 // We will make 4 controler functions here
 // -create product , -getAllproduct, -getSingleProduct, -remove product
@@ -47,16 +48,15 @@ const addProduct = async (req, res) => {
       price: Number(price),
       subCategory,
       // bestSeller boolean hai iss liay true ya false save krwain gy
-      bestseller= bestseller === 'true' ? true:false,
-    //   JSON.parse iss liay bcz string ki form mai data ko object ya array ki form mai convert krr sakain hmm.
-      sizes:JSON.parse(sizes),
-      image:imagesUrl,
-      date:Date.now()
+      bestseller: bestseller === "true" ? true : false,
+      //   JSON.parse iss liay bcz string ki form mai data ko object ya array ki form mai convert krr sakain hmm.
+      sizes: JSON.parse(sizes),
+      image: imagesUrl,
+      date: Date.now(),
     };
-    console.log(productData)
-  
+    console.log(productData);
 
-      // Waleed undefined 100 Mens topwear ["M"] true
+    // Waleed undefined 100 Mens topwear ["M"] true
     console.log(
       name,
       description,
@@ -67,17 +67,18 @@ const addProduct = async (req, res) => {
       bestseller,
     );
 
-
-  
-    
     console.log(imagesUrl);
- /*  [
+    /*  [
   'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
   'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
   'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
   'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
 ] */
-    res.json({});
+
+    const product = new productModel(productData);
+    await product.save();
+
+    res.json({ success: true, message: "Product Added" });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });

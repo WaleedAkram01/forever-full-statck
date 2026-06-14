@@ -102,6 +102,8 @@ const adminLogin = async (req, res) => {
 
       return res.status(200).json({
         success: true,
+        // Using this token we will authenticate our admin
+        // To authenticate we will make middleWare(adminAuth).
         token,
       });
     } else {

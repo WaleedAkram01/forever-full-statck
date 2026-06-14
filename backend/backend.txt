@@ -49,3 +49,18 @@ Then,
 Controller stuff needed to be done.
 userController.js() 
 productConroller.js
+
+Then, we will create route folder
+userRoutes.js->we will create routes for user registration,login,profile etc.
+
+productRoutes.js->we will create routes for creating product,getting product,updating product,deleting product etc
+
+
+Then, we will create server.js file to create express server and handle routes.
+
+
+Then, we will create middleware folder
+adminAuth.js->we will create middleware to check if the user is admin or not
+
+multer.js->we will create middleware to handle file upload
+

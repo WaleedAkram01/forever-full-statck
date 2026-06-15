@@ -1,0 +1,10 @@
+//After in our backend folder enough routes were created
+//We will create a admin folder 
+Here, npm create vite@latest .
+
+//Then we will install the dependencies
+npm install axios react-router-dom react-toastify
+-->react-router-dom is for routing in our react app
+
+One important information:-
+React ka project 5173 

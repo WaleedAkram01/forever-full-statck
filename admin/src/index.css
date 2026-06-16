@@ -7,6 +7,13 @@
 * {
   font-family: Outfit;
 }
+select,
+input,
+textarea {
+  border: 1px solid #c2c2c2;
+  outline-color: #c5b6a5;
+  border-radius: 4px;
+}
 
 /* Jo sidebar mai icons hain hmm chahty hain jb unn prr click karain tou naa tou active waly hilight kryy */
 .active {

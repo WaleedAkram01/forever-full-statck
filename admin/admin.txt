@@ -24,3 +24,13 @@ Jb jis Navlink prr clcik uss ka page show hoo ga.
 //After this,
 Login.jsx component  
 
+Jb user authenticate hoga then hi show hoo ga ussay UI.
+
+
+
+Logic behind Login
+Agrr Login button prr click karain tou api request jati hai aur resposne mai token aata hai 
+Hm ny state variabel banaya hua hai jis mai token store krwaya hai agrr token hai tou Ui waly pages dekhaa dega agrr token nahi hai tou login page show kray ga. 
+
+IN Logout
+Logout prr click karain tou token empty krdo aur login page show krdo.

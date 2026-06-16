@@ -1,3 +1,15 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+* {
+  font-family: Outfit;
+}
+
+/* Jo sidebar mai icons hain hmm chahty hain jb unn prr click karain tou naa tou active waly hilight kryy */
+.active {
+  background-color: #ffebf5;
+  border-color: #c586a5;
+}

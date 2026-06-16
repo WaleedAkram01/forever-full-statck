@@ -8,3 +8,19 @@ npm install axios react-router-dom react-toastify
 
 One important information:-
 React ka project 5173 
+Admin in 5174
+is done thorugh vite.config.js file
+
+In components folder:-
+Navbar.jsx
+Sidebar.jsx
+
+In sidebar.jsx mai naa hmm nyy route set kia huaa hai
+Jb jis Navlink prr clcik uss ka page show hoo ga.
+
+//We created pages.
+//Add.jsx,List.jsx,Orders.jsx
+
+//After this,
+Login.jsx component  
+

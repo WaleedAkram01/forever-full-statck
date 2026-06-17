@@ -16,8 +16,10 @@ import Footer from './components/Footer.jsx'
 import { ToastContainer, toast } from 'react-toastify';
 
 function App() {
+  console.log("App component chala!");
+
   return (
-    <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
+    < div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]' >
       <ToastContainer />
       <Navbar />
       <SearchBar />
@@ -34,7 +36,7 @@ function App() {
         <Route path='/product/:productId' element={<Product />} />
       </Routes>
       <Footer />
-    </div>
+    </ div>
   )
 }
 

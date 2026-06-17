@@ -5,15 +5,20 @@ import { useNavigate } from 'react-router-dom';
 
 export const ShopContext = createContext();
 function ShopContextProvider({ children }) {
+    console.log("ShopContext load hua!")
+
     const currency = 'PKR'
     const delivery_fee = 10;
+    // Search bar ki value store karne kyy liay state variable.
     const [search, setSearch] = useState('')
+    // Search bar dikhao ya chhupao
     const [showSearch, setShowSearch] = useState(true)
-    // Ab add to cart ki logic yehan pr likhain gy. Jab hm add to cart pr click karain gy tou wo product ka data iss cartItems state variable mai add ho jayega.
+    // cartItems---> Cart ka poora data iss mai hoo gaa
     const [cartItems, setCartItems] = useState({});
 
     // Jb proceed to checkout prr click karain gy tou wo checkout page prr navigate karay ga. Iss kyy liay useNavigate hook import kia hai react-router-dom se.
     const navigate = useNavigate();
+
 
     const addToCart = async (itemId, size) => {
 
@@ -24,17 +29,28 @@ function ShopContextProvider({ children }) {
         }
 
         let cartData = structuredClone(cartItems);
-
+        //  If product exists cartData["101"]
         if (cartData[itemId]) {
+            // Check Size Exists?
             if (cartData[itemId][size]) {
+                // Agrr already hai tou quantity increase kroo.
                 cartData[itemId][size] += 1;
             }
+            // Agrr sze already nhii koi thaa tou add krr do.
             else {
                 cartData[itemId][size] = 1;
             }
         }
+        // Yeh tbb chalta hai jb product pehli dfaa cart mai add honi hoo.
         else {
+            // Means hmm nyy 101 product select kia
+            // Yani product 101 ke liye ek khaali object bana diya.
             cartData[itemId] = {};
+            //  {   
+            //   "101": {
+            //     "M": 1
+            //   }
+            // }
             cartData[itemId][size] = 1;
         }
         setCartItems(cartData);

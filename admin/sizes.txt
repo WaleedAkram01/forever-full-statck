@@ -1,0 +1,109 @@
+2. onClick={() => ...}
+
+Jab kisi size par click karo ge to ye function chalega.
+
+Example:
+
+onClick={() => setSize(...)}
+
+Matlab state update hogi.
+
+3. setSize(prev => ...)
+
+Yahan React previous state (prev) deta hai.
+
+Maan lo:
+
+prev = ["S", "M"]
+
+To iska matlab currently S aur M selected hain.
+
+4. prev.includes(item)
+
+Check karta hai ke clicked item pehle se selected hai ya nahi.
+
+Example:
+
+prev = ["S", "M"]
+
+item = "M"
+
+prev.includes("M") // true
+5. Agar item already selected hai
+prev.filter(i => i !== item)
+
+Example:
+
+prev = ["S", "M", "L"]
+
+item = "M"
+
+Filter M ko remove kar dega:
+
+["S", "L"]
+
+Yani click karke unselect kar diya.
+
+6. Agar item selected nahi hai
+[...prev, item]
+
+Example:
+
+prev = ["S", "M"]
+
+item = "L"
+
+Result:
+
+["S", "M", "L"]
+
+Yani naya size add ho gaya.
+
+Real Flow
+
+Initial State:
+
+const [size, setSize] = useState([]);
+User "M" click karta hai
+prev = []
+
+includes("M") => false
+
+Result:
+
+["M"]
+User "L" click karta hai
+prev = ["M"]
+
+includes("L") => false
+
+Result:
+
+["M", "L"]
+User dobara "M" click karta hai
+prev = ["M", "L"]
+
+includes("M") => true
+
+Filter chalega:
+
+["L"]
+
+M remove ho gaya.
+
+Simple English
+
+Ye code toggle selection kar raha hai:
+
+Agar size selected nahi → add kar do.
+Agar size selected hai → remove kar do.
+
+Bilkul checkbox ki tarah:
+
+☑ M
+☑ L
+☐ XL
+
+Aur state kuch is tarah store hogi:
+
+["M", "L"]

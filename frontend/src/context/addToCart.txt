@@ -1,0 +1,290 @@
+Sabse Pehle Data Structure Samjho
+
+Ye function iss type ki state bana raha hai:
+
+{
+  "101": {
+    "M": 2,
+    "L": 1
+  },
+
+  "205": {
+    "S": 3
+  }
+}
+
+Meaning:
+
+Product 101
+  M size = 2 quantity
+  L size = 1 quantity
+
+Product 205
+  S size = 3 quantity
+Step 1: Function Call
+
+User Product Page par hai.
+
+addToCart("101", "M");
+
+To:
+
+itemId = "101"
+size = "M"
+Step 2: Size Validation
+if (!size) {
+    toast.error('Please select a size');
+    return;
+}
+
+Check:
+
+User ne size select ki hai ya nahi?
+
+Agar nahi:
+
+addToCart("101");
+
+To:
+
+Please select a size
+
+aur function wahin stop.
+
+Step 3: State Copy Banana
+let cartData = structuredClone(cartItems);
+
+React state ko direct change nahi karte.
+
+❌ Galat
+
+cartItems["101"]["M"] += 1;
+
+✅ Sahi
+
+let cartData = structuredClone(cartItems);
+
+Example:
+
+cartItems = {
+  101: {
+    M: 2
+  }
+}
+
+Copy:
+
+cartData = {
+  101: {
+    M: 2
+  }
+}
+
+Ab copy modify kar sakte hain.
+
+Step 4: Product Cart Mein Hai?
+if (cartData[itemId])
+
+Actually:
+
+if (cartData["101"])
+
+Check:
+
+Kya product 101 pehle se cart mein hai?
+CASE 1
+
+Cart:
+
+{}
+
+Product 101 nahi hai.
+
+To condition false.
+
+Control:
+
+else
+
+mein jayega.
+
+CASE 2
+
+Cart:
+
+{
+  101: {
+    M: 2
+  }
+}
+
+Product already hai.
+
+To condition true.
+
+Andar jayega.
+
+Step 5: Size Already Hai?
+if (cartData[itemId][size])
+
+Actually:
+
+if (cartData["101"]["M"])
+
+Check:
+
+Kya M size pehle se exist karti hai?
+CASE A
+
+Cart:
+
+{
+  101: {
+    M: 2
+  }
+}
+
+M already hai.
+
+To:
+
+cartData[itemId][size] += 1;
+
+Yani:
+
+2 + 1
+
+Result:
+
+{
+  101: {
+    M: 3
+  }
+}
+
+Quantity increase.
+
+CASE B
+
+Cart:
+
+{
+  101: {
+    M: 2
+  }
+}
+
+User L add karta hai.
+
+addToCart("101", "L");
+
+L exist nahi karti.
+
+To:
+
+cartData[itemId][size] = 1;
+
+Result:
+
+{
+  101: {
+    M: 2,
+    L: 1
+  }
+}
+
+New size add ho gayi.
+
+Step 6: Product Hi Nahi Hai
+
+Agar:
+
+{}
+
+To:
+
+else {
+    cartData[itemId] = {};
+    cartData[itemId][size] = 1;
+}
+Line 1
+cartData[itemId] = {};
+
+Ban gaya:
+
+{
+  101: {}
+}
+
+Product ke liye object bana.
+
+Line 2
+cartData[itemId][size] = 1;
+
+Ban gaya:
+
+{
+  101: {
+    M: 1
+  }
+}
+
+Product + Size + Quantity save ho gayi.
+
+Step 7: React State Update
+setCartItems(cartData);
+
+Purani state:
+
+{}
+
+Nayi state:
+
+{
+  101: {
+    M: 1
+  }
+}
+
+React re-render karega.
+
+Step 8: Success Message
+toast.success('Item added to cart');
+
+Screen par:
+
+✓ Item added to cart
+
+show ho jayega.
+
+Interview Style Summary
+
+Ye function 4 cheezein karta hai:
+
+1. Check karta hai size select hui hai ya nahi.
+
+2. Cart state ki copy banata hai.
+
+3. Product aur size exist karte hain ya nahi check karta hai.
+   - Product + Size hai → quantity increase.
+   - Product hai, size nahi → new size add.
+   - Product nahi → new product add.
+
+4. Updated cart state React mein save karta hai.
+Long-Term Memory Trick
+
+Har Add To Cart function ko dimagh mein is formula se yaad rakho:
+
+VALIDATE
+   ↓
+COPY STATE
+   ↓
+CHECK PRODUCT
+   ↓
+CHECK SIZE
+   ↓
+UPDATE QUANTITY
+   ↓
+SET STATE
+   ↓
+SHOW TOAST

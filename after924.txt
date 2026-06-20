@@ -10,3 +10,7 @@ Idhar hmm function banain gyy joo data ko backend syy fetch kray ga aur usko sta
 
 Then,
 Remember hmm ny backend mai API banai thii userAuth kii ussay bhii integrate karain gyy hmm properly.
+
+
+********FROM 10:00******************
+To get user cart data information to be save in DB

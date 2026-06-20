@@ -6,3 +6,7 @@
 
 ---> ShopContext.jsx :-
 Idhar hmm function banain gyy joo data ko backend syy fetch kray ga aur usko state variable mai store kray ga.
+
+
+Then,
+Remember hmm ny backend mai API banai thii userAuth kii ussay bhii integrate karain gyy hmm properly.

@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export const ShopContext = createContext();
-function ShopContextProvider({ children }) {
+
+export default function ShopContextProvider({ children }) {
     console.log("ShopContext load hua!")
 
     const currency = 'PKR'
@@ -21,6 +22,9 @@ function ShopContextProvider({ children }) {
     // Products data store karne kyy liay state variable.
     const [products, setProducts] = useState([]);
 
+    // Yeh will use this for login and SignUp
+    // And t be used in Login.jsx file
+    const [token, setToken] = useState('')
     // Jb proceed to checkout prr click karain gy tou wo checkout page prr navigate karay ga. Iss kyy liay useNavigate hook import kia hai react-router-dom se.
     const navigate = useNavigate();
 
@@ -132,6 +136,7 @@ function ShopContextProvider({ children }) {
         getProductsData()
     }, [])
 
+
     // We are passing here so we can access in any component.
     const value = {
         products,
@@ -157,5 +162,3 @@ function ShopContextProvider({ children }) {
         </div>
     )
 }
-
-export default ShopContextProvider;

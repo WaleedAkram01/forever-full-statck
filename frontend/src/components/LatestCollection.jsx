@@ -10,7 +10,7 @@ function LatestCollection() {
     useEffect(() => {
         // Set the latest products to the first 10 products from the context. This will run only once when the component mounts.
         setLatestProducts(products.slice(0, 10))
-    }, [])
+    }, [products])
 
 
     // Direct bina kisi state ke 10 products nikaalein to wo har render pe change hote rahenge aur infinite loop me chala jaayega kyunki state update hone pe component re-render hota hai. Isliye useState aur useEffect ka istemal karke hum ek baar hi latest products set karte hain, jisse infinite loop se bach sakte hain.

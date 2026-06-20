@@ -77,7 +77,7 @@ function Collection() {
     // Whenever category or subcategory changes we will call applyFilters function to apply filters on products and update the filteredProducts state.
     useEffect(() => {
         applyFilters();
-    }, [category, subCategory, search, showSearch]);
+    }, [category, subCategory, search, showSearch, products]);
     return (
         <div className='flex flex-col sm:flex-row gap-1 sm:gap-10  pt-10 border-t'>
             {/* Filter Options */}

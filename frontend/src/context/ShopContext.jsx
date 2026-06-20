@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from 'react'
-import { products } from '../assets/assets';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 export const ShopContext = createContext();
 function ShopContextProvider({ children }) {
@@ -9,12 +9,17 @@ function ShopContextProvider({ children }) {
 
     const currency = 'PKR'
     const delivery_fee = 10;
+    // Imported from backend folder.
+    const backendUrl = import.meta.env.VITE_BACKEND_URL
     // Search bar ki value store karne kyy liay state variable.
     const [search, setSearch] = useState('')
     // Search bar dikhao ya chhupao
     const [showSearch, setShowSearch] = useState(true)
     // cartItems---> Cart ka poora data iss mai hoo gaa
     const [cartItems, setCartItems] = useState({});
+
+    // Products data store karne kyy liay state variable.
+    const [products, setProducts] = useState([]);
 
     // Jb proceed to checkout prr click karain gy tou wo checkout page prr navigate karay ga. Iss kyy liay useNavigate hook import kia hai react-router-dom se.
     const navigate = useNavigate();
@@ -93,6 +98,7 @@ function ShopContextProvider({ children }) {
     }
 
 
+
     // When cartItems state variable changes then we want to log the cart items in console. So we will use useEffect for that.
     useEffect(() => {
         console.log(cartItems);
@@ -108,6 +114,23 @@ function ShopContextProvider({ children }) {
         setCartItems(cartData);
     }
 
+    const getProductsData = async () => {
+        try {
+            const response = await axios.get(backendUrl + '/api/product/list')
+            if (response.data.success) {
+                setProducts(response.data.products)
+            } else {
+                toast.error(response.data.message)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
+    useEffect(() => {
+        getProductsData()
+    }, [])
 
     // We are passing here so we can access in any component.
     const value = {
@@ -123,7 +146,8 @@ function ShopContextProvider({ children }) {
         getCartCount,
         updateQuantity,
         getCartAmount,
-        navigate
+        navigate,
+        backendUrl,
     }
     return (
         <div>

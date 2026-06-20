@@ -1,0 +1,8 @@
+--->Firstly hmm frontend aur backend koo sperate treat krr rhyy thyy.
+
+--->Aur assets.js mai (products) objects  syy sraa data aa rhaa thaa.
+
+---> Lakin ab data hmm backend mai API prr request karain gyy aur woo DB syy data fetch kryy ga.
+
+---> ShopContext.jsx :-
+Idhar hmm function banain gyy joo data ko backend syy fetch kray ga aur usko state variable mai store kray ga.

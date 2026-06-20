@@ -11,7 +11,7 @@ import { ToastContainer, toast } from 'react-toastify'
 // Yehan prr hmm backend URL add krr rhyy hain
 // export soo we can use in any component
 export const backendUrl = import.meta.env.VITE_BACKEND_URL
-
+export const currency = 'PKR'
 
 function App() {
 

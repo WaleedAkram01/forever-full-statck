@@ -6,8 +6,10 @@ import { React, useState } from 'react'
 import { assets } from '../assets/assets'
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import 
-const Add = () => {
+import { backendUrl } from '../App.jsx'
+
+// Remember:- Hhm tbb tkk product add nhii krr skty hain jbb tkk token naa sath send karain aur woo auhorize hoo jai
+const Add = ({ token }) => {
     //  Now we will make state variable to handle all form data.
 
     // Firstly state variable for all 4 images.
@@ -25,11 +27,13 @@ const Add = () => {
     // Initially size is empty array because user can select multiple sizes for a product.
     const [sizes, setSizes] = useState([]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         try {
 
             // FormData ka iss liay use kar rahe hain kyunki hum images ko bhi backend prr bhejna chahte hain aur images ko bhejne kyy liay formData ka use hota hai. Hm directly json format mai images ko backend prr nahi bhej sakte hain. 
+            // MOST important:-
+            // Jab aap isay use karte hain, toh background mein Content-Type: multipart/form-data header automatically set ho jata hai, jo server ko batata hai ki file aa rahi hai. 
             const formData = new FormData();
             formData.append("name", name);
             formData.append("description", description);
@@ -47,10 +51,35 @@ const Add = () => {
             if (image3) formData.append("image3", image3);
             if (image4) formData.append("image4", image4);
 
-            axios.post()
+            const response = await axios.post(`${backendUrl}/api/product/add`, formData, { headers: { token } });
+            console.log(response.data);
+
+
+            // Agrr data add hoo jai tou success ka toast show krr doo.
+            // and srii form data ko reset krr doo.
+            if (response.data.success) {
+                toast.success("Product added successfully");
+                setName("");
+                setDescription("");
+                setPrice("");
+                setCategory("Men");
+                setSubCategory("Topwear");
+                setBestseller(false);
+                setSizes([]);
+                setImage1(false);
+                setImage2(false);
+                setImage3(false);
+                setImage4(false);
+
+            }
+            else {
+                toast.error(response.data.message);
+            }
+
         }
         catch (error) {
-
+            console.log(error);
+            toast.error(error.message);
         }
 
     }

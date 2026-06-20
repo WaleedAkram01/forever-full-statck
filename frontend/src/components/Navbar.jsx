@@ -5,7 +5,15 @@ import { useContext } from 'react'
 import { ShopContext } from '../context/ShopContext'
 function Navbar() {
     const [visible, setVisible] = useState(false)
-    const { setShowSearch, getCartCount } = useContext(ShopContext)
+    const { setShowSearch, getCartCount, navigate, token, setToken, setCartItems } = useContext(ShopContext)
+
+    const logout = () => {
+        setToken('')
+        setCartItems({})
+        navigate('/login')
+
+    }
+
     return (
         <div className='flex items-center justify-between py-5 font-medium'>
             <Link to='/'><img src={assets.logo} alt='logo' className='w-36' /></Link>
@@ -36,16 +44,20 @@ function Navbar() {
                 <img onClick={() => setShowSearch(true)} src={assets.search_icon} alt='search' className='w-5 cursor-pointer' />
 
                 <div className='relative group'>
-                    <Link to='/login'><img src={assets.profile_icon} alt='profile' className='w-5 cursor-pointer' /></Link>
-                    <div className='absolute right-0 hidden pt-4 group-hover:block dropdown-menu'>
-                        <div className='flex flex-col gap-2 px-5 py-3 text-gray-500 rounded w-36 bg-slate-100'>
-                            <p className='cursor-pointer hover:text-black' >MY Profile</p>
-                            <p className='cursor-pointer hover:text-black' >Orders</p>
-                            <p className='cursor-pointer hover:text-black' >Logout</p>
-                        </div>
-                    </div>
-                </div>
+                    {/* We want that agrr hmm logout hain tou dropdown joo show hoo rha a tha woo na hoo. */}
+                    <img OnClick={() => token ? null : navigate('/login')} src={assets.profile_icon} alt='profile' className='w-5 cursor-pointer' />
 
+                    {/* Dropdown menu for logged-in users */}
+                    {token && (
+                        <div className='absolute right-0 hidden pt-4 group-hover:block dropdown-menu'>
+                            <div className='flex flex-col gap-2 px-5 py-3 text-gray-500 rounded w-36 bg-slate-100'>
+                                <p className='cursor-pointer hover:text-black' >MY Profile</p>
+                                <p className='cursor-pointer hover:text-black' >Orders</p>
+                                <p OnClick={logout} className='cursor-pointer hover:text-black' >Logout</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
                 <Link to='/cart' className='relative'>
                     <img src={assets.cart_icon} alt='cart' className='w-5 min-w-5 ' />
                     <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>{getCartCount()}</p>

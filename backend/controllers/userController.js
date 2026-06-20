@@ -41,19 +41,19 @@ const registration = async (req, res) => {
     // Check if user already exists then error de do.
     const exists = await userModel.findOne({ email });
     if (exists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({ success: false, message: "User already exists" });
     }
 
     // validation of email and password using validator library
     //Yeh code check karta hai ke user ne jo email enter kiya hai, kya woh sach mein aik sahi email address hai (jaise ali@gmail.com) ya bas fazool text hai.Agr galat jaisy yehan not operator hai ou error message dyy do Plz.
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ message: "Please enter a valid email" });
+      return res.status(400).json({ success: false, message: "Please enter a valid email" });
     }
 
     if (password.length < 8) {
       return res
         .status(400)
-        .json({ message: "Password must be at least 8 characters long" });
+        .json({ success: false, message: "Password must be at least 8 characters long" });
     }
 
     // If email and password are both correct then
@@ -77,10 +77,10 @@ const registration = async (req, res) => {
     const token = createToken(user._id);
     return res
       .status(201)
-      .json({ message: "User registered successfully", token });
+      .json({ success: true, message: "User registered successfully", token });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Internal server error" });
+    return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 

@@ -136,6 +136,14 @@ export default function ShopContextProvider({ children }) {
         getProductsData()
     }, [])
 
+    // Load token from localStorage when app starts
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+        }
+    }, [])
+
 
     // We are passing here so we can access in any component.
     const value = {
@@ -153,6 +161,8 @@ export default function ShopContextProvider({ children }) {
         getCartAmount,
         navigate,
         backendUrl,
+        token,
+        setToken,
     }
     return (
         <div>

@@ -31,6 +31,7 @@ const Login = () => {
                 if (response.data.success) {
                     setToken(response.data.token);
                     localStorage.setItem('token', response.data.token);
+                    toast.success('Account created successfully!');
                 }
                 else {
                     toast.error(response.data.message);
@@ -47,6 +48,7 @@ const Login = () => {
                 if (response.data.success) {
                     setToken(response.data.token);
                     localStorage.setItem('token', response.data.token);
+                    toast.success('Logged in successfully!');
                 }
                 else {
                     toast.error(response.data.message);
@@ -54,15 +56,24 @@ const Login = () => {
             }
             // Handle successful signup (e.g., redirect to login page)   
         } catch (error) {
-            console.log(error.message);
-            toast.error(error.message);
+            console.log(error);
+            // Catch axios error response with 400, 500 status codes
+            if (error.response && error.response.data && error.response.data.message) {
+                toast.error(error.response.data.message);
+            } else if (error.message) {
+                toast.error(error.message);
+            } else {
+                toast.error('Something went wrong');
+            }
         }
     };
 
     // Jb token state update hoga tou useEffect chaley ga aur uss mai hm check karain gy agrr token hai tou navigate kar do home page prr.
 
     // Still problem,
-    // ABbhii bhii aik problme yeh hoo rhii as hmm ny intially token empty rakhaa hai 
+    // ABbhii bhii aik problme yeh hoo rhii as hmm ny intially token state empty rakhaa hai uss syy yeh hoo ga kyy gyy mai signup krr ky home page prr aaun ga aur refresh karun ga tou token state lgyyga empty hii hai aur dubara profile mai chhala jaun ga 
+    //Iss liay ShopContext mai functon banain gyy aur check karain gyy agrr LocalStorage mai token hai tou ussay wahan prr hii rakhy.
+    // Iss  sy hm brr brr My Profile prr  nhi jaa p-in gyy.
     useEffect(() => {
         if (token) {
             navigate('/');

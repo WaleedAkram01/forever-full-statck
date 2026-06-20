@@ -8,9 +8,10 @@ function Navbar() {
     const { setShowSearch, getCartCount, navigate, token, setToken, setCartItems } = useContext(ShopContext)
 
     const logout = () => {
-        setToken('')
-        setCartItems({})
         navigate('/login')
+        setToken('')
+        localStorage.removeItem('token')
+        setCartItems({})
 
     }
 
@@ -45,7 +46,7 @@ function Navbar() {
 
                 <div className='relative group'>
                     {/* We want that agrr hmm logout hain tou dropdown joo show hoo rha a tha woo na hoo. */}
-                    <img OnClick={() => token ? null : navigate('/login')} src={assets.profile_icon} alt='profile' className='w-5 cursor-pointer' />
+                    <img onClick={() => token ? null : navigate('/login')} src={assets.profile_icon} alt='profile' className='w-5 cursor-pointer' />
 
                     {/* Dropdown menu for logged-in users */}
                     {token && (
@@ -53,7 +54,7 @@ function Navbar() {
                             <div className='flex flex-col gap-2 px-5 py-3 text-gray-500 rounded w-36 bg-slate-100'>
                                 <p className='cursor-pointer hover:text-black' >MY Profile</p>
                                 <p className='cursor-pointer hover:text-black' >Orders</p>
-                                <p OnClick={logout} className='cursor-pointer hover:text-black' >Logout</p>
+                                <p onClick={logout} className='cursor-pointer hover:text-black' >Logout</p>
                             </div>
                         </div>
                     )}

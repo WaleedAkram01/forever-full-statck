@@ -38,7 +38,24 @@ const addToCart = async (req, res) => {
 };
 
 // update user cart
-const updateCart = async (req, res) => {};
+const updateCart = async (req, res) => {
+  try {
+    const { userId, cartData, size, quantity } = req.body;
+
+    const userData = await userModel.findById(userId);
+    // We will update this cart data and then we will save it in database.
+    let userCartData = await userData.cartData;
+    // We will update the quantity of this size in this ItemId with the given quantity.
+    userCartData[cartData][size] = quantity;
+    // Ab hum nyy cartData update kr diya hai tou usko database mai save kr den gy.
+    await userModel.findByIdAndUpdate(userId, { cartData: userCartData });
+
+    res.json({ success: true, message: "Cart updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Error updating cart" });
+  }
+};
 
 // get user cart data
 const getUserCart = async (req, res) => {};

@@ -123,13 +123,41 @@ export default function ShopContextProvider({ children }) {
 
 
     // Purose of this function
-    // In this we can clear the cart items.
+    // Yeh function is liay hai keh jab bhi user cart page prr jaye tou uska cart data backend syy fetch kr krr laay aur uss hisaab syy cartItems state variable ko update kr de taki cart page prr sahi data show ho. 
     const updateQuantity = async (itemId, size, quantity) => {
         let cartData = structuredClone(cartItems);
 
         cartData[itemId][size] = quantity;
         setCartItems(cartData);
+
+        if (token) {
+            try {
+                await axios.post(backendUrl + '/api/cart/update', { itemId, size, quantity }, { headers: { token } })
+
+            } catch (error) {
+                console.log(error)
+                toast.error('Failed to update cart')
+            }
+        }
     }
+
+    // Now problem is that hmm cart mai koi data Enter karain gyy Header mai cart ka count update hota hai lakin na refresh krty hain tou khatam hoo jata hai.
+    // Kindly doo fix it someHow Plz
+    // Hm DB syy lain gy
+    const getUserCart = async (token) => {
+        try {
+            const response = await axios.post(backendUrl + '/api/cart/get', {}, { headers: { token } })
+            // Ab API kyy response mai agrr cart data aai ga tou hmm ussay cartItems state variable mai set kr den gy taki cart page pr wo show ho sakay.
+            if (response.data.success) {
+                setCartItems(response.data.cart)
+            }
+        }
+        catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
+    }
+
 
     const getProductsData = async () => {
         try {
@@ -145,6 +173,7 @@ export default function ShopContextProvider({ children }) {
         }
     }
 
+
     useEffect(() => {
         getProductsData()
     }, [])
@@ -154,9 +183,10 @@ export default function ShopContextProvider({ children }) {
         const storedToken = localStorage.getItem('token');
         if (storedToken) {
             setToken(storedToken);
+            // Now we will call getUserCart function to fetch the cart data from backend and set it to cartItems state variable.
+            getUserCart(storedToken);
         }
     }, [])
-
 
     // We are passing here so we can access in any component.
     const value = {

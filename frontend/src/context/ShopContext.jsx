@@ -136,7 +136,7 @@ export default function ShopContextProvider({ children }) {
 
             } catch (error) {
                 console.log(error)
-                toast.error('Failed to update cart')
+                toast.error(error.message)
             }
         }
     }
@@ -149,7 +149,7 @@ export default function ShopContextProvider({ children }) {
             const response = await axios.post(backendUrl + '/api/cart/get', {}, { headers: { token } })
             // Ab API kyy response mai agrr cart data aai ga tou hmm ussay cartItems state variable mai set kr den gy taki cart page pr wo show ho sakay.
             if (response.data.success) {
-                setCartItems(response.data.cart)
+                setCartItems(response.data.cartData)
             }
         }
         catch (error) {
@@ -202,8 +202,10 @@ export default function ShopContextProvider({ children }) {
         getCartCount,
         updateQuantity,
         getCartAmount,
+        getUserCart,
         navigate,
         backendUrl,
+        setCartItems,
         token,
         setToken,
     }

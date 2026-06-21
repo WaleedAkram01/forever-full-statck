@@ -1,6 +1,35 @@
+import { orderModel } from "../models/orderModel.js";
+
 // Placing orders using COD Method
 // Agrr user nyy paymnet method mai COD select kia hai tou uss case mai yeh API call hogi aur order place hoga.
-const placeOrder = async (req, res) => {};
+const placeOrder = async (req, res) => {
+  try {
+    // This userId is from token decode. And items, amount, address are from request body that user will send when placing order.
+    const { userId, items, amount, address } = req.body;
+
+    // Ab hum nyy order data ko create krain gy aur usko database mai save kr den gy.
+    const orderData = {
+      userId,
+      items,
+      address,
+      amount,
+      paymentMethod: "COD",
+      payment: false,
+      date: Date.now(),
+    };
+    // Ab hum nyy orderData create kr diya hai tou usko database mai save kr den gy.
+    const newOrder = new orderModel(orderData);
+    await newOrder.save();
+
+    // Clears the user's cart data after successfully placing the order
+    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+
+    res.json({ success: true, message: "Order Placed" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // Placing orders using Stripe Method
 const placeOrderStripe = async (req, res) => {};

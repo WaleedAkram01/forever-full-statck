@@ -78,110 +78,110 @@ export default function ShopContextProvider({ children }) {
         }
 
     }
-}
-//Now functonality kyy ahi cart prr static number shhow hoo rha ahi dynamic number how hoo.
-const getCartCount = () => {
-    let totalCount = 0;
-    for (const items in cartItems) {
-        for (const item in cartItems[items]) {
-            try {
-                if (cartItems[items][item] > 0) {
-                    totalCount += cartItems[items][item];
+
+    //Now functonality kyy ahi cart prr static number shhow hoo rha ahi dynamic number how hoo.
+    const getCartCount = () => {
+        let totalCount = 0;
+        for (const items in cartItems) {
+            for (const item in cartItems[items]) {
+                try {
+                    if (cartItems[items][item] > 0) {
+                        totalCount += cartItems[items][item];
+                    }
+                } catch (error) {
+                    // Error handling
                 }
-            } catch (error) {
-                // Error handling
             }
         }
+        return totalCount;
     }
-    return totalCount;
-}
 
-// Yeh is sliay keh naa hmm total cart amount calculate kar sakain aur naa hi checkout page pr wo show kar sakain gy.
-const getCartAmount = () => {
-    let totalAmount = 0;
-    for (const items in cartItems) {
-        let itemInfo = products.find((product) => product._id === items);
-        for (const item in cartItems[items]) {
-            try {
-                if (cartItems[items][item] > 0) {
-                    totalAmount += itemInfo.price * cartItems[items][item];
+    // Yeh is sliay keh naa hmm total cart amount calculate kar sakain aur naa hi checkout page pr wo show kar sakain gy.
+    const getCartAmount = () => {
+        let totalAmount = 0;
+        for (const items in cartItems) {
+            let itemInfo = products.find((product) => product._id === items);
+            for (const item in cartItems[items]) {
+                try {
+                    if (cartItems[items][item] > 0) {
+                        totalAmount += itemInfo.price * cartItems[items][item];
+                    }
+                } catch (error) {
+
                 }
-            } catch (error) {
-
             }
         }
+        return totalAmount;
     }
-    return totalAmount;
-}
 
 
 
-// When cartItems state variable changes then we want to log the cart items in console. So we will use useEffect for that.
-useEffect(() => {
-    console.log(cartItems);
-}, [cartItems])
+    // When cartItems state variable changes then we want to log the cart items in console. So we will use useEffect for that.
+    useEffect(() => {
+        console.log(cartItems);
+    }, [cartItems])
 
 
-// Purose of this function
-// In this we can clear the cart items.
-const updateQuantity = async (itemId, size, quantity) => {
-    let cartData = structuredClone(cartItems);
+    // Purose of this function
+    // In this we can clear the cart items.
+    const updateQuantity = async (itemId, size, quantity) => {
+        let cartData = structuredClone(cartItems);
 
-    cartData[itemId][size] = quantity;
-    setCartItems(cartData);
-}
+        cartData[itemId][size] = quantity;
+        setCartItems(cartData);
+    }
 
-const getProductsData = async () => {
-    try {
-        const response = await axios.get(backendUrl + '/api/product/list')
-        if (response.data.success) {
-            setProducts(response.data.products)
-        } else {
-            toast.error(response.data.message)
+    const getProductsData = async () => {
+        try {
+            const response = await axios.get(backendUrl + '/api/product/list')
+            if (response.data.success) {
+                setProducts(response.data.products)
+            } else {
+                toast.error(response.data.message)
+            }
+        } catch (error) {
+            console.log(error)
+            toast.error(error.message)
         }
-    } catch (error) {
-        console.log(error)
-        toast.error(error.message)
     }
+
+    useEffect(() => {
+        getProductsData()
+    }, [])
+
+    // Load token from localStorage when app starts
+    useEffect(() => {
+        const storedToken = localStorage.getItem('token');
+        if (storedToken) {
+            setToken(storedToken);
+        }
+    }, [])
+
+
+    // We are passing here so we can access in any component.
+    const value = {
+        products,
+        currency,
+        delivery_fee,
+        search,
+        setSearch,
+        showSearch,
+        setShowSearch,
+        cartItems,
+        addToCart,
+        getCartCount,
+        updateQuantity,
+        getCartAmount,
+        navigate,
+        backendUrl,
+        token,
+        setToken,
+    }
+    return (
+        <div>
+            <ShopContext.Provider value={value}>
+                {children}
+            </ShopContext.Provider>
+        </div>
+    )
 }
-
-useEffect(() => {
-    getProductsData()
-}, [])
-
-// Load token from localStorage when app starts
-useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-        setToken(storedToken);
-    }
-}, [])
-
-
-// We are passing here so we can access in any component.
-const value = {
-    products,
-    currency,
-    delivery_fee,
-    search,
-    setSearch,
-    showSearch,
-    setShowSearch,
-    cartItems,
-    addToCart,
-    getCartCount,
-    updateQuantity,
-    getCartAmount,
-    navigate,
-    backendUrl,
-    token,
-    setToken,
-}
-return (
-    <div>
-        <ShopContext.Provider value={value}>
-            {children}
-        </ShopContext.Provider>
-    </div>
-)
-    }

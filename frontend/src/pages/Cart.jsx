@@ -8,21 +8,25 @@ const Cart = () => {
     const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
     const [cartData, setCartData] = useState([]);
 
+
     useEffect(() => {
-        const tempData = [];
-        for (const items in cartItems) {
-            for (const item in cartItems[items]) {
-                if (cartItems[items][item] > 0) {
-                    tempData.push({
-                        _id: items,
-                        size: item,
-                        quantity: cartItems[items][item]
-                    })
+        if (products.length > 0) {
+            const tempData = [];
+            for (const items in cartItems) {
+                for (const item in cartItems[items]) {
+                    if (cartItems[items][item] > 0) {
+                        tempData.push({
+                            _id: items,
+                            size: item,
+                            quantity: cartItems[items][item]
+                        })
+                    }
                 }
             }
+            setCartData(tempData); // 💡 Added to save the processed items into state
         }
-        setCartData(tempData); // 💡 Added to save the processed items into state
-    }, [cartItems]) // 💡 Added cartItems dependency to track cart updates
+
+    }, [cartItems, products]) // 💡 Added cartItems dependency to track cart updates
 
     return (
         <div className='border-t pt-14'>

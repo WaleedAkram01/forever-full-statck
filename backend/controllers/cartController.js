@@ -40,15 +40,16 @@ const addToCart = async (req, res) => {
 // update user cart
 const updateCart = async (req, res) => {
   try {
-    const { userId, cartData, size, quantity } = req.body;
+    const { userId, itemId, size, quantity } = req.body;
 
     const userData = await userModel.findById(userId);
-    // We will update this cart data and then we will save it in database.
-    let userCartData = await userData.cartData;
+    // Hm nyy uss cart maii syy cartData ko access kia.
+    let cartData = await userData.cartData;
+
     // We will update the quantity of this size in this ItemId with the given quantity.
-    userCartData[cartData][size] = quantity;
+    cartData[itemId][size] = quantity;
     // Ab hum nyy cartData update kr diya hai tou usko database mai save kr den gy.
-    await userModel.findByIdAndUpdate(userId, { cartData: userCartData });
+    await userModel.findByIdAndUpdate(userId, { cartData: cartData });
 
     res.json({ success: true, message: "Cart updated successfully" });
   } catch (error) {
@@ -58,6 +59,10 @@ const updateCart = async (req, res) => {
 };
 
 // get user cart data
-const getUserCart = async (req, res) => {};
+const getUserCart = async (req, res) => {
+  try {
+    const { userId } = req.body;
+  } catch (error) {}
+};
 
 export const { addToCart, updateCart, getUserCart };

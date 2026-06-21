@@ -28,6 +28,7 @@ export default function ShopContextProvider({ children }) {
     // Jb proceed to checkout prr click karain gy tou wo checkout page prr navigate karay ga. Iss kyy liay useNavigate hook import kia hai react-router-dom se.
     const navigate = useNavigate();
 
+    //  Purpose of this function
 
     const addToCart = async (itemId, size) => {
 
@@ -64,111 +65,123 @@ export default function ShopContextProvider({ children }) {
         }
         setCartItems(cartData);
         toast.success('Item added to cart');
-    }
+        // Ab hum nyy cartData update kr diya hai tou usko database mai save kr den gy.
+        // First we will check if user is logged in or not. Agrr token hai tou hum API call krain gy add to cart kyy liay.
 
-    //Now functonality kyy ahi cart prr static number shhow hoo rha ahi dynamic number how hoo.
-    const getCartCount = () => {
-        let totalCount = 0;
-        for (const items in cartItems) {
-            for (const item in cartItems[items]) {
-                try {
-                    if (cartItems[items][item] > 0) {
-                        totalCount += cartItems[items][item];
-                    }
-                } catch (error) {
-                    // Error handling
-                }
+        if (token) {
+            try {
+                await axios.post(backendUrl + '/api/cart/add', { itemId, size }, { headers: { token } })
+            } catch (error) {
+                console.log(error)
+                toast.error('Failed to add item to cart')
             }
         }
-        return totalCount;
+
     }
-
-    // Yeh is sliay keh naa hmm total cart amount calculate kar sakain aur naa hi checkout page pr wo show kar sakain gy.
-    const getCartAmount = () => {
-        let totalAmount = 0;
-        for (const items in cartItems) {
-            let itemInfo = products.find((product) => product._id === items);
-            for (const item in cartItems[items]) {
-                try {
-                    if (cartItems[items][item] > 0) {
-                        totalAmount += itemInfo.price * cartItems[items][item];
-                    }
-                } catch (error) {
-
-                }
-            }
-        }
-        return totalAmount;
-    }
-
-
-
-    // When cartItems state variable changes then we want to log the cart items in console. So we will use useEffect for that.
-    useEffect(() => {
-        console.log(cartItems);
-    }, [cartItems])
-
-
-    // Purose of this function
-    // In this we can clear the cart items.
-    const updateQuantity = async (itemId, size, quantity) => {
-        let cartData = structuredClone(cartItems);
-
-        cartData[itemId][size] = quantity;
-        setCartItems(cartData);
-    }
-
-    const getProductsData = async () => {
-        try {
-            const response = await axios.get(backendUrl + '/api/product/list')
-            if (response.data.success) {
-                setProducts(response.data.products)
-            } else {
-                toast.error(response.data.message)
-            }
-        } catch (error) {
-            console.log(error)
-            toast.error(error.message)
-        }
-    }
-
-    useEffect(() => {
-        getProductsData()
-    }, [])
-
-    // Load token from localStorage when app starts
-    useEffect(() => {
-        const storedToken = localStorage.getItem('token');
-        if (storedToken) {
-            setToken(storedToken);
-        }
-    }, [])
-
-
-    // We are passing here so we can access in any component.
-    const value = {
-        products,
-        currency,
-        delivery_fee,
-        search,
-        setSearch,
-        showSearch,
-        setShowSearch,
-        cartItems,
-        addToCart,
-        getCartCount,
-        updateQuantity,
-        getCartAmount,
-        navigate,
-        backendUrl,
-        token,
-        setToken,
-    }
-    return (
-        <div>
-            <ShopContext.Provider value={value}>
-                {children}
-            </ShopContext.Provider>
-        </div>
-    )
 }
+//Now functonality kyy ahi cart prr static number shhow hoo rha ahi dynamic number how hoo.
+const getCartCount = () => {
+    let totalCount = 0;
+    for (const items in cartItems) {
+        for (const item in cartItems[items]) {
+            try {
+                if (cartItems[items][item] > 0) {
+                    totalCount += cartItems[items][item];
+                }
+            } catch (error) {
+                // Error handling
+            }
+        }
+    }
+    return totalCount;
+}
+
+// Yeh is sliay keh naa hmm total cart amount calculate kar sakain aur naa hi checkout page pr wo show kar sakain gy.
+const getCartAmount = () => {
+    let totalAmount = 0;
+    for (const items in cartItems) {
+        let itemInfo = products.find((product) => product._id === items);
+        for (const item in cartItems[items]) {
+            try {
+                if (cartItems[items][item] > 0) {
+                    totalAmount += itemInfo.price * cartItems[items][item];
+                }
+            } catch (error) {
+
+            }
+        }
+    }
+    return totalAmount;
+}
+
+
+
+// When cartItems state variable changes then we want to log the cart items in console. So we will use useEffect for that.
+useEffect(() => {
+    console.log(cartItems);
+}, [cartItems])
+
+
+// Purose of this function
+// In this we can clear the cart items.
+const updateQuantity = async (itemId, size, quantity) => {
+    let cartData = structuredClone(cartItems);
+
+    cartData[itemId][size] = quantity;
+    setCartItems(cartData);
+}
+
+const getProductsData = async () => {
+    try {
+        const response = await axios.get(backendUrl + '/api/product/list')
+        if (response.data.success) {
+            setProducts(response.data.products)
+        } else {
+            toast.error(response.data.message)
+        }
+    } catch (error) {
+        console.log(error)
+        toast.error(error.message)
+    }
+}
+
+useEffect(() => {
+    getProductsData()
+}, [])
+
+// Load token from localStorage when app starts
+useEffect(() => {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+        setToken(storedToken);
+    }
+}, [])
+
+
+// We are passing here so we can access in any component.
+const value = {
+    products,
+    currency,
+    delivery_fee,
+    search,
+    setSearch,
+    showSearch,
+    setShowSearch,
+    cartItems,
+    addToCart,
+    getCartCount,
+    updateQuantity,
+    getCartAmount,
+    navigate,
+    backendUrl,
+    token,
+    setToken,
+}
+return (
+    <div>
+        <ShopContext.Provider value={value}>
+            {children}
+        </ShopContext.Provider>
+    </div>
+)
+    }

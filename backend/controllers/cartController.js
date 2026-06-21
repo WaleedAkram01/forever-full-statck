@@ -62,7 +62,20 @@ const updateCart = async (req, res) => {
 const getUserCart = async (req, res) => {
   try {
     const { userId } = req.body;
-  } catch (error) {}
+    const userData = await userModel.findById(userId);
+
+    // Simply iss tarahn bhii krr skty hain.
+    // Lkain agrr lines of code increase krna hai tou
+    // res.json({ success: true, cartData: userData.cartData });
+
+    let cartData = await userData.cartData;
+    res.json({ success: true, cartData });
+  } catch (error) {
+    console.log(error);
+    res
+      .status(500)
+      .json({ success: false, message: "Error fetching cart data" });
+  }
 };
 
 export { addToCart, updateCart, getUserCart };

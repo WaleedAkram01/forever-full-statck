@@ -14,7 +14,7 @@ import Navbar from './components/Navbar.jsx'
 import SearchBar from './components/SearchBar.jsx'
 import Footer from './components/Footer.jsx'
 import { ToastContainer, toast } from 'react-toastify';
-
+import Verify from './pages/Verify.jsx'
 function App() {
   console.log("App component chala!");
 
@@ -32,7 +32,8 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/orders' element={<Orders />} />
         <Route path='/place-order' element={<PlaceOrder />} />
-
+        {/* Yeh hmm ny componenets ko mount kia hai  */}
+        <Route path='/verify' element={<Verify />} />
         <Route path='/product/:productId' element={<Product />} />
       </Routes>
       <Footer />

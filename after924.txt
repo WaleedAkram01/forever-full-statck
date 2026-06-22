@@ -14,3 +14,12 @@ Remember hmm ny backend mai API banai thii userAuth kii ussay bhii integrate kar
 
 ********FROM 10:00******************
 To get user cart data information to be save in DB
+
+
+*********AT 12:12***********
+HM PAYMENT METHOD INTEGRATE KARAIN GYY STRIPE KO.
+
+Firstly,
+1. Stripe account bnaain gyy aur uska secret key le lain gy
+2.Then .env mai woo secret key add karain gyy.
+3. Then we will use stripe secret key to create instance.

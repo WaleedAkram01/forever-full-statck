@@ -41,11 +41,29 @@ const placeOrderRazorpay = async (req, res) => {};
 // *********************************
 // All Orders data for Admin Panel
 // Admin Panel mai hum nyy ek page banaya hai jismein admin apne store ke sare orders dekh sakta hai aur unka status update kar sakta hai. Tou iss page ke liye yeh API call hogi jismein admin apne store ke sare orders ka data fetch kar sakta hai.
-const allOrders = async (req, res) => {};
+const allOrders = async (req, res) => {
+  try {
+    const orders = await orderModel.find({});
+    res.json({ success: true, orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // User Order Data For Forntend
 // Purpose of this API is that when user place an order tou usko apne orders ka data dikhe jismein uske sare orders ka data show ho aur usko apne orders ka status bhi pata chale.
-const userOrders = async (req, res) => {};
+const userOrders = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const orders = await orderModel.find({ userId });
+    res.json({ success: true, orders });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // update order status
 // Admin Panel mai admin apne store ke orders ka status update kar sakta hai. Tou iss API call se admin apne store ke orders ka status update kar sakta hai.

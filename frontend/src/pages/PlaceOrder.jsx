@@ -4,9 +4,9 @@ import { assets } from '../assets/assets'
 import CartTotal from '../components/CartTotal'
 import { useContext } from 'react'
 import { ShopContext } from '../context/ShopContext'
-import { useState } from 'react'
-import { ShopContext } from '../context/ShopContext'
-
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import { toast } from 'react-toastify'
 function PlaceOrder() {
     const [method, setMethod] = useState('cod')
     const { navigate, backendUrl, token, cartItems, setCartItems, getCartAmount, delivery_fee, products } = useContext(ShopContext);
@@ -31,10 +31,61 @@ function PlaceOrder() {
         setFormData(data => ({ ...data, [name]: value }))
     }
 
-    const { navigate } = useContext(ShopContext)
-    const onSubmitHandler = async (event) => {
-        event.preventDefault();
 
+    const onSubmitHandler = async (event) => {
+        event.preventDefault()
+
+        try {
+            //  Yeh orderItems array iss liay banaya hai kyy na jab user place order krrta hai tou uss waqt hmmm cartItems mai syy un items ki details nikal kr orderItems array mai store kr lain gy, jisse hum backend ko bhej sakein aur uss hisaab syy order create krwa saken.
+            let orderItems = []
+
+            // Yeh nested loop iss liay hai kyy na cartItems ek nested object hai jisme pehle product id hota hai aur uske andar size wise quantity hoti hai. Tou hmmm dono loop chalakar cartItems mai syy un items ki details nikal kr orderItems array mai store kr lain gy.
+            for (const items in cartItems) {
+                // Yeh line iss liay hai kyy na cartItems mai syy product id se us product ki details nikal lain gy taki hum orderItems array mai uss hisaab syy product ki details store kr saken.
+                for (const item in cartItems[items]) {
+                    // Yeh line iss liay hai kyy na cartItems mai syy size wise quantity check kr lain gy kyy na wo 0 se zyada hai, agrr wo 0 se zyada hai tou uss item ki details nikal kr orderItems array mai store kr lain gy.
+                    if (cartItems[items][item] > 0) {
+                        // Yeh line iss liay hai kyy na products array mai syy product id se us product ki details nikal lain gy taki hum orderItems array mai uss hisaab syy product ki details store kr saken. StructuredClone is used to create a deep copy of the product object, so that when we add size and quantity properties to it, it does not affect the original product object in the products array.
+                        const itemInfo = structuredClone(products.find(product => product._id === items))
+                        // Yeh line iss liay hai kyy na itemInfo object mai size aur quantity properties add kr lain gy taki jab hum orderItems array mai uss item ki details store krain tou uss hisaab syy size aur quantity ki details bhi store ho jayein.
+                        if (itemInfo) {
+                            // Yeh line iss liay hai kyy na itemInfo object mai size aur quantity properties add kr lain gy taki jab hum orderItems array mai uss item ki details store krain tou uss hisaab syy size aur quantity ki details bhi store ho jayein.
+                            itemInfo.size = item
+                            // Yeh line iss liay hai kyy na itemInfo object mai size aur quantity properties add kr lain gy taki jab hum orderItems array mai uss item ki details store krain tou uss hisaab syy size aur quantity ki details bhi store ho jayein.
+                            itemInfo.quantity = cartItems[items][item]
+                            // Yeh line iss liay hai kyy na orderItems array mai uss item ki details store kr lain gy taki jab hum backend ko orderItems array bhejen tou uss hisaab syy us item ki details backend ko mil jayein.
+                            orderItems.push(itemInfo)
+                        }
+                    }
+                }
+            }
+            let orderData = {
+                address: formData,
+                items: orderItems,
+                amount: getCartAmount() + delivery_fee
+            }
+
+            switch (method) {
+
+                // API Calls for COD
+                case 'cod':
+                    const response = await axios.post(backendUrl + '/api/order/place', orderData, { headers: { token } })
+                    if (response.data.success) {
+                        setCartItems({})
+                        navigate('/orders')
+                    } else {
+                        toast.error(response.data.message)
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+        catch (error) {
+            console.log(error)
+            toast.error(error.message)
+        }
     }
     return (
         <form onSubmit={onSubmitHandler} className='flex flex-col sm:flex-row justify-between gap-4 pt-5  min-h-[80vh] border-t '>

@@ -1,4 +1,5 @@
 import { orderModel } from "../models/orderModel.js";
+import { userModel } from "../models/userModel.js";
 
 // Placing orders using COD Method
 // Agrr user nyy paymnet method mai COD select kia hai tou uss case mai yeh API call hogi aur order place hoga.
@@ -22,7 +23,7 @@ const placeOrder = async (req, res) => {
     await newOrder.save();
 
     // Clears the user's cart data after successfully placing the order
-    await userModel.findByIdAndUpdate(userId, { cartData: {} });
+    await userModel.findByIdAndUpdate(userId, { cart: {} });
 
     res.json({ success: true, message: "Order Placed" });
   } catch (error) {

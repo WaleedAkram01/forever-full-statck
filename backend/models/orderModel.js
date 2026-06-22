@@ -9,7 +9,7 @@ const orderSchema = new mongoose.Schema({
   // Here we will store the total amount of the order.
   amount: { type: Number, required: true },
   // Here we will store the delivery address of the order.
-  address: { type: String, required: true },
+  address: { type: Object, required: true },
   // Here we will store the status of the order.
   //   default value is Order Placed because jb user order place krrta hai tou order ka status Order Placed hoga aur jb admin order ko process krrta hai tou uska status change kr den gy.
   status: { type: String, required: true, default: "Order Placed" },

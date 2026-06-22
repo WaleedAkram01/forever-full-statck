@@ -29,7 +29,7 @@ const Orders = () => {
                     });
                 });
 
-
+                // Latest order would be dispalyed on top of the page
                 setOrderData(allOrdersItem.reverse());
             }
         } catch (error) {

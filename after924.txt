@@ -23,3 +23,5 @@ Firstly,
 1. Stripe account bnaain gyy aur uska secret key le lain gy
 2.Then .env mai woo secret key add karain gyy.
 3. Then we will use stripe secret key to create instance.
+4- Then we will create placeOrderStripe in orderController.js file to handle stripe payment and create session.
+

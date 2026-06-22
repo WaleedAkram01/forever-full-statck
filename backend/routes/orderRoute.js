@@ -2,7 +2,7 @@ import express from "express";
 import {
   placeOrder,
   placeOrderStripe,
-  placeOrderRazorpay,
+  // placeOrderRazorpay,
   allOrders,
   userOrders,
   updateStatus,
@@ -19,7 +19,7 @@ orderRouter.post("/status", adminAuth, updateStatus);
 // Payment Features
 orderRouter.post("/place", authUser, placeOrder);
 orderRouter.post("/stripe", authUser, placeOrderStripe);
-orderRouter.post("/razorpay", authUser, placeOrderRazorpay);
+// orderRouter.post("/razorpay", authUser, placeOrderRazorpay);
 
 // User Feature
 orderRouter.post("/userorders", authUser, userOrders);

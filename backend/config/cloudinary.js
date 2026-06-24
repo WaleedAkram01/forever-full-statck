@@ -9,6 +9,10 @@ import "dotenv/config";
 // cloud_name: Ye aap ke Cloudinary account ka unique naam (ID) hai, jahan aap ki images save hoti hain.
 // api_key: Ye aap ka username samajh lein, jo Cloudinary ko batata hai ke ye aap ka hi account hai.
 // api_secret: Ye aap ka password hai. Is ko hamesha secret rakha jata hai taakay koi aur aap ke account ko access na kare.
+
+// Remember:-
+// cloudinary.config() sirf settings set karta hai (woh fail nahi hota)
+// Bcz image admin side syy upload hoti hai.
 const connectCloudinary = async () => {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_NAME,

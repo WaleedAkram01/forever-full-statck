@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema(
       default: {},
     },
   },
-  // minimize: Hm nyy yeh iss liay likhaa hai bcz upar joo cart mai bydefault mpty object hai mongoose yeh allow nhii krta hai bydefault, toh minimize: false krne se mongoose ko yeh pata chal jata hai ki cart field mai empty object bhi allow hai.
+  // minimize: Hm nyy yeh iss liay likhaa hai bcz upar joo cart mai bydefault empty object hai mongoose yeh allow nhii krta hai bydefault, toh minimize: false krne se mongoose ko yeh pata chal jata hai ki cart field mai empty object bhi allow hai.
   { minimize: false },
 );
 

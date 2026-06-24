@@ -1,7 +1,7 @@
 // Jb user apna cart complete krr lai ga place-order page mai apni details joo enter kryyy ga uss kyy liay ab Schema banain gy.
 
 import mongoose from "mongoose";
-
+// Purpos of this schema is to store the order details in the database. Jb user apna cart complete krr lai ga place-order page mai apni details joo enter kryyy ga uss kyy liay ab Schema banain gy.
 const orderSchema = new mongoose.Schema({
   userId: { type: String, required: true },
   // Here we will store product data that user has added to cart and placed order.

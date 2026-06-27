@@ -20,7 +20,8 @@ const addProduct = async (req, res) => {
       sizes,
       bestseller,
     } = req.body;
-
+    // Purpose of && yeh hai kyy agar image1 exist krta hai tou hi uss ki value ko image1 mai daal do warna undefined daal do.
+    //req.files.image1 && req.files.image1[0] — yeh ek safety check hai: "agar image1 mojood hai (&&), tabhi usay lo." Kyunki ho sakta admin ne sirf 2 images di hon, 4 nahi. (Bina is check ke undefined pe crash hota.)
     const image1 = req.files.image1 && req.files.image1[0];
     const image2 = req.files.image2 && req.files.image2[0];
     const image3 = req.files.image3 && req.files.image3[0];
@@ -32,7 +33,7 @@ const addProduct = async (req, res) => {
     const images = [image1, image2, image3, image4].filter(
       (item) => item !== undefined,
     );
-
+    //  SEE IN BLOOGER REGARDING THIS QUESTION:-14
     let imagesUrl = await Promise.all(
       images.map(async (item) => {
         // item.path --->.path idhar na joo multer temporary iMage save krta hai woo hmm ab cloudianry mai uplaod karain gyy AUR then woo URL daii ga cludinary ga jisy DB mai save krwaa lain gy.
@@ -47,6 +48,7 @@ const addProduct = async (req, res) => {
       name,
       description,
       category,
+      // Frontend syy data strng kii form mai aata hai iss liay hmm ussay number mai convert krwa lain gy.
       // As DB mai hmm number ki form proceas nuber store krwain gy
       price: Number(price),
       subCategory,

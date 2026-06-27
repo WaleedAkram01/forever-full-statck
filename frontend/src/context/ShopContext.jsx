@@ -28,7 +28,13 @@ export default function ShopContextProvider({ children }) {
     // Jb proceed to checkout prr click karain gy tou wo checkout page prr navigate karay ga. Iss kyy liay useNavigate hook import kia hai react-router-dom se.
     const navigate = useNavigate();
 
-    //  Purpose of this function
+    //  ADD TP CRAT funnction
+    // Understand Why this approach is better of frnetnd and backend mai addToCart Wali.
+    // Click
+    // UI Update Immediately
+    // Backend Save
+    // Agar Save Fail Ho
+    // UI Rollback
 
     const addToCart = async (itemId, size) => {
 
@@ -79,7 +85,7 @@ export default function ShopContextProvider({ children }) {
 
     }
 
-    //Now functonality kyy ahi cart prr static number shhow hoo rha ahi dynamic number how hoo.
+    // Iss ka complate knwolegde context kii fiels mai hai
     const getCartCount = () => {
         let totalCount = 0;
         for (const items in cartItems) {
@@ -159,6 +165,7 @@ export default function ShopContextProvider({ children }) {
     }
 
 
+    // This is for getALLproduct data api.
     const getProductsData = async () => {
         try {
             const response = await axios.get(backendUrl + '/api/product/list')

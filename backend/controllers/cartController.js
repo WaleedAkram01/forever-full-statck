@@ -2,6 +2,13 @@
 import { userModel } from "../models/userModel.js";
 
 // Add products to user cart
+// Most Important Concept:-
+// Sawaal: dono jagah same logic kyun fronetnd and backend prr same code hai addToCart ka.?
+
+// Frontend → screen foran update ho (user ko turant dikhe), DB ka intezaar na karna pade
+// Backend → DB mein permanent save ho (refresh pe bach jaaye)
+// Isay "optimistic update" kehte hain — frontend pehle dikha deta hai, backend baad mein confirm karta hai. ⚡ (Interview keyword!)
+
 const addToCart = async (req, res) => {
   try {
     // userId is from token decode.
@@ -28,7 +35,7 @@ const addToCart = async (req, res) => {
       cartData[itemId][size] = 1;
     }
 
-    // Ab hum nyy cartData update kr diya hai tou usko database mai save kr den gy.
+    // Isss user ko dhoondho aur uska cart field naye cartData se update kar do
     await userModel.findByIdAndUpdate(userId, { cart: cartData });
 
     res.json({ success: true, message: "Item added to cart successfully" });
@@ -39,6 +46,9 @@ const addToCart = async (req, res) => {
 };
 
 // update user cart
+//Agrr kaam upar waly syy hii joo jana tha atou iss ska kia purpposoe hai
+//Dekho user, agrr addTocart product kii a ur +1 krii jaa rhaa then upar wala hii sue hoo ga
+//Lkain agrr quantity direct 5 likh dyy means bss quantity update hoo rhii hai then yeh use hoo gs
 const updateCart = async (req, res) => {
   try {
     const { userId, itemId, size, quantity } = req.body;

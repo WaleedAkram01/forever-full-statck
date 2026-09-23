@@ -15,9 +15,20 @@ connectCloudinary();
 
 // Middlewares
 app.use(express.json());
+const allowedOrigins = [
+  "https://forever-full-statck.vercel.app",
+  "https://forever-admin-pied-ten.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
 app.use(
   cors({
-    origin: "https://forever-full-statck.vercel.app",
+    origin: (origin, callback) => {
+      // Postman/server-to-server requests ka origin nahi hota
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    allowedHeaders: ["Content-Type", "token"],
   }),
 );
 

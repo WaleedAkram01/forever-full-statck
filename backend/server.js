@@ -15,7 +15,11 @@ connectCloudinary();
 
 // Middlewares
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://forever-full-statck.vercel.app",
+  }),
+);
 
 // API Endpoints
 app.use("/api/users", userRouter);

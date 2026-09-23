@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "frontend",
+      "framework": "vite",
+      "rootDirectory": "frontend"
+    },
+    {
+      "name": "admin",
+      "framework": "vite",
+      "rootDirectory": "admin"
+    },
+    {
+      "name": "backend",
+      "framework": "express",
+      "rootDirectory": "backend"
+    }
+  ]
+}

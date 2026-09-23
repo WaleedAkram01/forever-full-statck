@@ -1,20 +1,15 @@
 {
-  "version": 2,
-  "projects": [
-    {
-      "name": "frontend",
-      "framework": "vite",
-      "rootDirectory": "frontend"
+  "services": {
+    "frontend": {
+      "root": "frontend",
+      "framework": "vite"
     },
-    {
-      "name": "admin",
-      "framework": "vite",
-      "rootDirectory": "admin"
+    "admin": {
+      "root": "admin",
+      "framework": "vite"
     },
-    {
-      "name": "backend",
-      "framework": "express",
-      "rootDirectory": "backend"
+    "backend": {
+      "root": "backend"
     }
-  ]
+  }
 }

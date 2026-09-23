@@ -12,7 +12,6 @@ function Navbar() {
         setToken('')
         localStorage.removeItem('token')
         setCartItems({})
-
     }
 
     return (
@@ -42,8 +41,9 @@ function Navbar() {
             </ul>
 
             <div className='flex items-center gap-6 '>
+                {/* Search Icon */}
                 <img onClick={() => setShowSearch(true)} src={assets.search_icon} alt='search' className='w-5 cursor-pointer' />
-
+                {/* Profile Icon */}
                 <div className='relative group'>
                     {/* We want that agrr hmm logout hain tou dropdown joo show hoo rha a tha woo na hoo. */}
                     <img onClick={() => token ? null : navigate('/login')} src={assets.profile_icon} alt='profile' className='w-5 cursor-pointer' />
@@ -59,12 +59,15 @@ function Navbar() {
                         </div>
                     )}
                 </div>
+                {/* Our Cart Icon */}
                 <Link to='/cart' className='relative'>
                     <img src={assets.cart_icon} alt='cart' className='w-5 min-w-5 ' />
                     <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>{getCartCount()}</p>
                 </Link>
                 <img onClick={() => setVisible(true)} src={assets.menu_icon} alt='menu' className='w-5 cursor-pointer sm:hidden' />
             </div>
+
+
             {/* SideBar Menu for small screens */}
             <div className={`absolute top-0 bottom-0 right-0 overflow-hidden transition-all bg-white ${visible ? 'w-full' : 'w-0'}`}>
                 <div className='flex flex-col text-gray-600'>

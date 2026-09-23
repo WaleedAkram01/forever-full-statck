@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+
+addtoCart.txt
+context.txt
+getCartCount.txt
+
+setup.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

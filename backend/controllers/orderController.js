@@ -67,6 +67,8 @@ const placeOrderStripe = async (req, res) => {
         product_data: {
           name: item.name,
         },
+        // multily byy 100 because stripe only accept amount in cents
+        //e.g if price is 1000 tou stripe mai usko 100000 cents mai convert krnyy kyy liay multiply by 100 kia hai.
         unit_amount: item.price * 100,
       },
       quantity: item.quantity,

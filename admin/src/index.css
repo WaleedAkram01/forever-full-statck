@@ -1,22 +1,17 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-* {
-  font-family: Outfit;
-}
-select,
-input,
-textarea {
-  border: 1px solid #c2c2c2;
-  outline-color: #c5b6a5;
-  border-radius: 4px;
+@layer base {
+  body { @apply bg-cream font-sans text-ink antialiased; }
+  h1, h2, h3 { @apply font-display; }
 }
 
-/* Jo sidebar mai icons hain hmm chahty hain jb unn prr click karain tou naa tou active waly hilight kryy */
-.active {
-  background-color: #ffebf5;
-  border-color: #c586a5;
+@layer components {
+  .input { @apply w-full rounded-md border border-line bg-white px-3.5 py-2.5 text-sm outline-none transition placeholder:text-muted/70 focus:border-ink; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-md bg-ink px-5 py-2.5 text-sm font-medium text-white transition hover:bg-rust disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-md border border-line bg-white px-4 py-2 text-sm transition hover:border-ink; }
+  .card { @apply rounded-lg border border-line bg-white; }
+  .label { @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-muted; }
 }

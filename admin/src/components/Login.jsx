@@ -1,72 +1,55 @@
-import React from 'react'
 import { useState } from 'react'
 import axios from 'axios'
-import { backendUrl } from '../App.jsx'
+import { toast } from 'react-toastify'
+import { backendUrl, DEMO_CREDENTIALS } from '../config.js'
 
-const Login = ({ setToken }) => {
-
+const Login = ({ onLogin }) => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    const [loading, setLoading] = useState(false)
 
-    const onSubmitHandler = async (e) => {
-
+    const submit = async (creds) => {
+        setLoading(true)
         try {
-
-            // Hotta kia hai is skyy bagair form submit hone pr page reload ho jata hai aur humara state reset ho jata hai. Isliye hum form submit hone pr default behavior ko prevent karte hain.
-            e.preventDefault()
-            // For now just log the email and password to the console
-            console.log(email, password)
-            //  yeh backend URL hai iss prr post request kii ja rhi hai jisme email aur password bheja ja rha hai. 
-            const response = await axios.post(backendUrl + '/api/users/admin', { email, password })
-            // Hm console.log lgaa krr dekh skty agrr na response.data mai token aai tou tbb UI dikh jai gii.
-            // Andar Hm state veriable mai token add krr dain gyy and then actually UI show hoo ga hamain.
-            if (response.data.token) {
-                setToken(response.data.token)
+            const { data } = await axios.post(backendUrl + '/api/users/admin', creds)
+            if (data.success) {
+                onLogin(data.token, data.role || 'admin')
+                toast.success(data.role === 'demo' ? 'Signed in to the read-only demo' : 'Welcome back')
+            } else {
+                toast.error(data.message)
             }
-            else {
-                toast.error(response.data.message)
-            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Could not sign in')
+        } finally {
+            setLoading(false)
         }
-        catch (error) {
-            console.log(error)
-            toast.error(error.message)
-
-        }
-
-
     }
 
     return (
-        <div className='flex items-center justify-center w-full min-h-screen'>
-            <div className='max-w-md px-8 py-6 bg-white rounded-lg shadow-md'>
-                <h1 className='mb-4 text-2xl font-bold'>Admin Panel</h1>
-                <form onSubmit={onSubmitHandler}>
-                    <div className='mb-3 min-w-72'>
-                        <p className='mb-2 text-sm font-medium text-gray-700'>Email Address</p>
-                        <input
-                            className='w-full px-3 py-2 border border-gray-300 rounded-md outline-none'
-                            type="email"
-                            placeholder="your@email.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+        <div className="flex min-h-screen items-center justify-center bg-sand px-4">
+            <div className="w-full max-w-md">
+                <p className="mb-6 text-center font-display text-3xl font-semibold">kapra<span className="text-rust">.</span> <span className="font-sans text-base font-normal text-muted">admin</span></p>
+                <form onSubmit={(e) => { e.preventDefault(); submit({ email, password }) }} className="card p-8">
+                    <h1 className="text-2xl font-semibold">Sign in</h1>
+                    <p className="mt-1 text-sm text-muted">Manage products and orders for the Kapra store.</p>
+                    <div className="mt-6 space-y-4">
+                        <div>
+                            <label className="label" htmlFor="email">Email</label>
+                            <input id="email" className="input" type="text" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                        </div>
+                        <div>
+                            <label className="label" htmlFor="password">Password</label>
+                            <input id="password" className="input" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                        </div>
                     </div>
-
-                    <div className='mb-3 min-w-72'>
-                        <p className='mb-2 text-sm font-medium text-gray-700'>Password</p>
-                        <input
-                            className='w-full px-3 py-2 border border-gray-300 rounded-md outline-none'
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <button className='w-full py-2 mt-2 text-white bg-black rounded-md ' type="submit">Login</button>
+                    <button disabled={loading} className="btn-primary mt-6 w-full py-3" type="submit">{loading ? 'Signing in…' : 'Sign in'}</button>
                 </form>
+
+                <div className="card mt-4 border-dashed p-5 text-sm">
+                    <p className="font-medium">Just looking around?</p>
+                    <p className="mt-1 text-muted">Use the read-only demo account. You can browse everything, but changes are blocked.</p>
+                    <button disabled={loading} onClick={() => submit(DEMO_CREDENTIALS)} className="btn-ghost mt-4 w-full">Explore the demo</button>
+                </div>
             </div>
         </div>
     )

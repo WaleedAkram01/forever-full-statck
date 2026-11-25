@@ -1,157 +1,123 @@
-import { useContext, useState, useEffect } from 'react'
-import { ShopContext } from '../context/ShopContext';
-import { assets } from '../assets/assets';
-import Title from '../components/Title';
-import ProductItem from '../components/ProductItem';
-function Collection() {
-    // Ab hmm search karain aur relevent product show hoo woo bhii yehan hii karai gy like I added search,showSearch & further see applyFilters function. 
-    const { products, search, showSearch } = useContext(ShopContext);
-    const [showfilter, setShowFilter] = useState(false)
-    const [filteredProducts, setFilteredProducts] = useState([])
-    // Further,We will  add logic on filters
-    const [category, setCategory] = useState([])
-    const [subCategory, setSubCategory] = useState([])
-    const [sortType, setSortType] = useState('relevant')
+import { useContext, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { ShopContext } from '../context/shop'
+import { ProductGrid } from '../components/ProductItem'
+import { CloseIcon } from '../components/Icons'
 
-    // This is for category.
-    const toogleCategory = (e) => {
-        // Dekho Hm na checkbox prr click karain gy Agrr already category state me wo category hai to usko remove kar do Agrr nhi hai to usko add kar do 
-        if (category.includes(e.target.value)) {
-            // Means in this case category is already in this category array we will remove that category.
-            setCategory(prev => prev.filter((item) => item !== e.target.value));
-        } else {
-            // Means in this case category is not in this category array we will add that category.
-            setCategory(prev => [...prev, e.target.value]);
-        }
+const CATEGORIES = ['Women', 'Men', 'Kids']
+const SUB_CATEGORIES = ['Topwear', 'Bottomwear', 'Winterwear']
 
-    }
-    // This is for subcategory.
-    const toogleSubCategory = (e) => {
-        if (subCategory.includes(e.target.value)) {
-            setSubCategory(prev => prev.filter((item) => item !== e.target.value));
-        } else {
-            setSubCategory(prev => [...prev, e.target.value]);
-        }
-    }
-
-    // This function will apply filters on products based on category and subcategory. It will be called whenever category or subcategory changes.
-    const applyFilters = () => {
-        let productCopy = products.slice()
-
-        if (showSearch && search) {
-            productCopy = productCopy.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()))
-        }
-        if (category.length > 0) {
-            productCopy = productCopy.filter((item) => category.includes(item.category))
-        }
-        if (subCategory.length > 0) {
-            productCopy = productCopy.filter((item) => subCategory.includes(item.subCategory))
-        }
-        setFilteredProducts(productCopy)
-    }
-
-
-    // Ab sorting kyy 
-    const sortProducts = () => {
-        // It will create a copy of filteredProducts array.
-        let fpCopy = filteredProducts.slice();
-
-        switch (sortType) {
-            case 'low-high':
-                setFilteredProducts(fpCopy.sort((a, b) => a.price - b.price))
-                break;
-            case 'high-low':
-                setFilteredProducts(fpCopy.sort((a, b) => b.price - a.price))
-                break;
-            default:
-                applyFilters();
-                break;
-
-        }
-    }
-
-    useEffect(() => {
-        sortProducts();
-    }, [sortType])
-
-    // Whenever category or subcategory changes we will call applyFilters function to apply filters on products and update the filteredProducts state.
-    useEffect(() => {
-        applyFilters();
-    }, [category, subCategory, search, showSearch, products]);
+function FilterGroup({ title, keyName, values, selected, products, onToggle }) {
     return (
-        <div className='flex flex-col sm:flex-row gap-1 sm:gap-10  pt-10 border-t'>
-            {/* Filter Options */}
-            <div onClick={() => setShowFilter(!showfilter)} className='min-w-60'>
-                <p className='my-2 text-xl flex items-center cursor-pointer gap-2'>FILTERS
-                    <img className={`h-3 sm:hidden ${showfilter ? 'rotate-90' : ''} `} src={assets.dropdown_icon} alt="Filter" />
-                </p>
-                {/* Categories Filter */}
-                <div className={`border border-gray-300 pl-5 py-3 mt-6 ${showfilter ? '' : 'hidden'} sm:block `} >
-                    <p className='text-gray-500 text-sm mb-1'>Categories</p>
-                    <div className='flex flex-col gap-2 text-sm font-light text-gray-700 '>
-                        <p className='flex gap-2'>
-                            <input onChange={toogleCategory} className='w-3' type='checkbox' value={'Men'} />
-                            Men
-                        </p>
-                        <p className='flex gap-2'>
-                            <input onChange={toogleCategory} className='w-3' type='checkbox' value={'Women'} />
-                            Women
-                        </p>
-                        <p className='flex gap-2'>
-                            <input onChange={toogleCategory} className='w-3' type='checkbox' value={'Kids'} />
-                            Kids
-                        </p>
-                    </div>
-                </div>
-
-                {/*SubCategories Filter */}
-                <div className={`border border-gray-300 pl-5 py-3 my-6 ${showfilter ? '' : 'hidden'} sm:block `} >
-                    <p className='text-gray-500 text-sm mb-1'>SubCategories</p>
-                    <div className='flex flex-col gap-2 text-sm font-light text-gray-700 '>
-                        <p className='flex gap-2'>
-                            <input onChange={toogleSubCategory} className='w-3' type='checkbox' value={'Topwear'} />
-                            Topwear
-                        </p>
-                        <p className='flex gap-2'>
-                            <input onChange={toogleSubCategory} className='w-3' type='checkbox' value={'Bottomwear'} />
-                            Bottomwear
-                        </p>
-                        <p className='flex gap-2'>
-                            <input onChange={toogleSubCategory} className='w-3' type='checkbox' value={'Winterwear'} />
-                            Winterwear
-                        </p>
-                    </div>
-                </div>
-
-
+        <div className="border-b border-line py-6">
+            <p className="eyebrow mb-4 text-ink">{title}</p>
+            <div className="flex flex-col gap-3 text-sm">
+                {values.map((v) => (
+                    <label key={v} className="flex cursor-pointer items-center gap-3">
+                        <input type="checkbox" checked={selected.includes(v)} onChange={() => onToggle(keyName, v)} className="h-4 w-4 accent-[#9A3B1E]" />
+                        <span className={selected.includes(v) ? 'font-medium' : 'text-muted'}>{v}</span>
+                        <span className="ml-auto text-xs text-muted">
+                            {products.filter((p) => (keyName === 'category' ? p.category : p.subCategory) === v).length}
+                        </span>
+                    </label>
+                ))}
             </div>
-
-
-            {/* Right Side */}
-            <div className='flex-1'>
-                <div className='flex justify-between text-base sm:text-2xl mb-4 '>
-                    <Title text1={'ALL'} text2={'COLLECTION'} />
-                    {/* Product Sort */}
-                    <select onChange={(e) => setSortType(e.target.value)} className='border-2 border-gray-300 text-sm px-2 '>
-                        <option value='relevant'>Newest</option>
-                        <option value='low-high'>Sort by: Low To High</option>
-                        <option value='high-low'>Sort by: High To Low</option>
-                    </select>
-                </div>
-                {/* Map Products */}
-                <div className='grid grid-cols-2 md:grid-cols-3 
-                 lg:grid-cols-4 gap-4 gap-y-6'>
-                    {filteredProducts.map((product, index) => (
-                        <ProductItem key={index} name={product.name} id={product._id} price={product.price} image={product.image} />
-                    ))}
-
-                </div>
-
-
-            </div>
-
         </div>
     )
 }
 
-export default Collection;
+function Collection() {
+    const { products, productsLoading, search, showSearch, setSearch } = useContext(ShopContext)
+    const [params, setParams] = useSearchParams()
+    const [showFilters, setShowFilters] = useState(false)
+    const [sortType, setSortType] = useState('newest')
+
+    const category = params.getAll('category')
+    const subCategory = params.getAll('sub')
+
+    const toggle = (key, value) => {
+        const next = new URLSearchParams(params)
+        const current = next.getAll(key)
+        next.delete(key)
+        const updated = current.includes(value) ? current.filter((v) => v !== value) : [...current, value]
+        updated.forEach((v) => next.append(key, v))
+        setParams(next, { replace: true })
+    }
+
+    const clearAll = () => {
+        setParams({}, { replace: true })
+        setSearch('')
+    }
+
+    const filtered = useMemo(() => {
+        let list = products.slice()
+        const q = search.trim().toLowerCase()
+        if (showSearch && q) {
+            list = list.filter((p) => `${p.name} ${p.description} ${p.category} ${p.subCategory}`.toLowerCase().includes(q))
+        }
+        if (category.length) list = list.filter((p) => category.includes(p.category))
+        if (subCategory.length) list = list.filter((p) => subCategory.includes(p.subCategory))
+
+        if (sortType === 'low-high') list.sort((a, b) => a.price - b.price)
+        else if (sortType === 'high-low') list.sort((a, b) => b.price - a.price)
+        else list.sort((a, b) => b.date - a.date)
+        return list
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [products, search, showSearch, sortType, params])
+
+    const activeFilters = [...category, ...subCategory]
+
+    return (
+        <div className="container-page pt-10">
+            <div className="mb-8 flex flex-col gap-2 border-b border-line pb-8">
+                <p className="eyebrow">Shop</p>
+                <h1 className="text-4xl font-medium sm:text-5xl">{category.length === 1 ? `${category[0]}’s collection` : 'All products'}</h1>
+                <p className="text-sm text-muted">{productsLoading ? 'Loading products…' : `${filtered.length} ${filtered.length === 1 ? 'item' : 'items'}`}</p>
+            </div>
+
+            <div className="flex flex-col gap-8 lg:flex-row lg:gap-12">
+                <aside className="lg:w-60 lg:flex-shrink-0">
+                    <button onClick={() => setShowFilters(!showFilters)} className="btn-outline w-full lg:hidden">
+                        {showFilters ? 'Hide filters' : 'Show filters'}{activeFilters.length > 0 && ` (${activeFilters.length})`}
+                    </button>
+                    <div className={`${showFilters ? 'block' : 'hidden'} lg:block`}>
+                        <FilterGroup title="Category" keyName="category" values={CATEGORIES} selected={category} products={products} onToggle={toggle} />
+                        <FilterGroup title="Type" keyName="sub" values={SUB_CATEGORIES} selected={subCategory} products={products} onToggle={toggle} />
+                        {activeFilters.length > 0 && (
+                            <button onClick={clearAll} className="mt-4 text-sm text-rust underline underline-offset-4">Clear all filters</button>
+                        )}
+                    </div>
+                </aside>
+
+                <div className="flex-1">
+                    <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-wrap gap-2">
+                            {activeFilters.map((f) => (
+                                <button key={f} onClick={() => toggle(category.includes(f) ? 'category' : 'sub', f)} className="flex items-center gap-1.5 border border-line bg-white px-3 py-1.5 text-xs">
+                                    {f} <CloseIcon size={12} />
+                                </button>
+                            ))}
+                        </div>
+                        <select value={sortType} onChange={(e) => setSortType(e.target.value)} className="border border-line bg-white px-3 py-2 text-sm outline-none">
+                            <option value="newest">Sort: Newest</option>
+                            <option value="low-high">Price: Low to high</option>
+                            <option value="high-low">Price: High to low</option>
+                        </select>
+                    </div>
+
+                    {!productsLoading && filtered.length === 0 ? (
+                        <div className="border border-dashed border-line px-6 py-20 text-center">
+                            <p className="font-display text-2xl">No products found</p>
+                            <p className="mt-2 text-sm text-muted">Try a different search or remove some filters.</p>
+                            <button onClick={clearAll} className="btn-primary mt-6">Reset filters</button>
+                        </div>
+                    ) : (
+                        <ProductGrid items={filtered} loading={productsLoading} count={9} className="grid-cols-2 md:grid-cols-3" />
+                    )}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default Collection

@@ -1,98 +1,90 @@
-import React, { useState } from 'react'
-import { assets } from '../assets/assets'
-import { Link, NavLink } from 'react-router-dom'
-import { useContext } from 'react'
-import { ShopContext } from '../context/ShopContext'
-function Navbar() {
-    const [visible, setVisible] = useState(false)
-    const { setShowSearch, getCartCount, navigate, token, setToken, setCartItems } = useContext(ShopContext)
+import { useContext, useState } from 'react'
+import { Link, NavLink, useLocation } from 'react-router-dom'
+import { ShopContext } from '../context/shop'
+import Logo from './Logo'
+import { BagIcon, CloseIcon, MenuIcon, SearchIcon, UserIcon } from './Icons'
 
-    const logout = () => {
-        navigate('/login')
-        setToken('')
-        localStorage.removeItem('token')
-        setCartItems({})
+const links = [
+    { to: '/', label: 'Home' },
+    { to: '/collection', label: 'Shop' },
+    { to: '/about', label: 'Our Story' },
+    { to: '/contact', label: 'Contact' },
+]
+
+function Navbar() {
+    const [open, setOpen] = useState(false)
+    const { setShowSearch, getCartCount, navigate, token, logout } = useContext(ShopContext)
+    const location = useLocation()
+    const count = getCartCount()
+
+    const openSearch = () => {
+        setShowSearch(true)
+        if (!location.pathname.includes('collection')) navigate('/collection')
     }
 
     return (
-        <div className='flex items-center justify-between py-5 font-medium'>
-            <Link to='/'><img src={assets.logo} alt='logo' className='w-36' /></Link>
-            <ul className='hidden gap-5 text-sm text-gray-700 sm:flex'>
-                {/* The <NavLink> tag is a special component in React Router. It acts like an anchor <a> tag but allows for seamless in-app navigation without page reloads. */}
+        <header className="sticky top-0 z-40 border-b border-line bg-cream/90 backdrop-blur">
+            <div className="bg-ink py-2 text-center text-[11px] font-medium uppercase tracking-widest2 text-cream">
+                Free exchanges within 7 days · Cash on delivery across Pakistan
+            </div>
+            <nav className="container-page flex h-16 items-center justify-between">
+                <Logo />
 
-                <NavLink to='/' className='flex flex-col items-center gap-1 '>
-                    <p>Home</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-                </NavLink>
-                <NavLink to='/collection' className='flex flex-col items-center gap-1'>
-                    <p>Collection</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden   ' />
-                </NavLink>
-                <NavLink to='/about' className='flex flex-col items-center gap-1'>
-                    <p>About</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden             ' />
-                </NavLink>
+                <ul className="hidden items-center gap-8 text-sm sm:flex">
+                    {links.map((l) => (
+                        <li key={l.to}>
+                            <NavLink to={l.to} end={l.to === '/'} className="group flex flex-col items-center gap-1 text-muted transition hover:text-ink [&.active]:text-ink">
+                                {l.label}
+                                <span className="h-px w-0 bg-rust transition-all group-hover:w-full group-[.active]:w-full" />
+                            </NavLink>
+                        </li>
+                    ))}
+                </ul>
 
-                <NavLink to='/contact' className='flex flex-col items-center gap-1'>
-                    <p>Contact</p>
-                    <hr className='w-2/4 border-none h-[1.5px] bg-gray-700 hidden' />
-                </NavLink>
+                <div className="flex items-center gap-5">
+                    <button onClick={openSearch} aria-label="Search" className="transition hover:text-rust"><SearchIcon /></button>
 
-            </ul>
-
-            <div className='flex items-center gap-6 '>
-                {/* Search Icon */}
-                <img onClick={() => setShowSearch(true)} src={assets.search_icon} alt='search' className='w-5 cursor-pointer' />
-                {/* Profile Icon */}
-                <div className='relative group'>
-                    {/* We want that agrr hmm logout hain tou dropdown joo show hoo rha a tha woo na hoo. */}
-                    <img onClick={() => token ? null : navigate('/login')} src={assets.profile_icon} alt='profile' className='w-5 cursor-pointer' />
-
-                    {/* Dropdown menu for logged-in users */}
-                    {token && (
-                        <div className='absolute right-0 hidden pt-4 group-hover:block dropdown-menu'>
-                            <div className='flex flex-col gap-2 px-5 py-3 text-gray-500 rounded w-36 bg-slate-100'>
-                                <p className='cursor-pointer hover:text-black' >MY Profile</p>
-                                <p onClick={() => navigate('/orders')} className='cursor-pointer hover:text-black' >Orders</p>
-                                <p onClick={logout} className='cursor-pointer hover:text-black' >Logout</p>
+                    <div className="group relative">
+                        <button aria-label="Account" onClick={() => (token ? navigate('/orders') : navigate('/login'))} className="transition hover:text-rust"><UserIcon /></button>
+                        {token && (
+                            <div className="invisible absolute right-0 top-full z-50 pt-3 opacity-0 transition group-hover:visible group-hover:opacity-100">
+                                <div className="card flex w-40 flex-col py-2 text-sm shadow-lg">
+                                    <button onClick={() => navigate('/orders')} className="px-4 py-2 text-left hover:bg-sand">My orders</button>
+                                    <button onClick={() => { logout(); navigate('/login') }} className="px-4 py-2 text-left hover:bg-sand">Sign out</button>
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
-                {/* Our Cart Icon */}
-                <Link to='/cart' className='relative'>
-                    <img src={assets.cart_icon} alt='cart' className='w-5 min-w-5 ' />
-                    <p className='absolute right-[-5px] bottom-[-5px] w-4 text-center leading-4 bg-black text-white aspect-square rounded-full text-[8px]'>{getCartCount()}</p>
-                </Link>
-                <img onClick={() => setVisible(true)} src={assets.menu_icon} alt='menu' className='w-5 cursor-pointer sm:hidden' />
-            </div>
-
-
-            {/* SideBar Menu for small screens */}
-            <div className={`absolute top-0 bottom-0 right-0 overflow-hidden transition-all bg-white ${visible ? 'w-full' : 'w-0'}`}>
-                <div className='flex flex-col text-gray-600'>
-                    <div onClick={() => setVisible(false)} className='flex items-center gap-4 p-3 cursor-pointer'>
-                        <img src={assets.dropdown_icon} alt='logo' className='h-4 rotate-180' />
-                        <p>Back</p>
+                        )}
                     </div>
-                    <NavLink to='/' onClick={() => setVisible(false)} className='py-2 pl-6 border'>
-                        <p>Home</p>
-                    </NavLink>
-                    <NavLink to='/collection' onClick={() => setVisible(false)} className='py-2 pl-6 border'>
-                        <p>Collection</p>
-                    </NavLink>
-                    <NavLink to='/about' onClick={() => setVisible(false)} className='py-2 pl-6 border'>
-                        <p>About</p>
-                    </NavLink>
-                    <NavLink to='/contact' onClick={() => setVisible(false)} className='py-2 pl-6 border'>
-                        <p>Contact</p>
-                    </NavLink>
-                </div>
 
+                    <Link to="/cart" aria-label={`Bag, ${count} items`} className="relative transition hover:text-rust">
+                        <BagIcon />
+                        {count > 0 && (
+                            <span className="absolute -right-2 -top-1.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-rust px-1 text-[10px] font-semibold text-white">{count}</span>
+                        )}
+                    </Link>
+
+                    <button onClick={() => setOpen(true)} aria-label="Open menu" className="sm:hidden"><MenuIcon /></button>
+                </div>
+            </nav>
+
+            {/* Mobile drawer */}
+            <div className={`fixed inset-0 z-50 bg-ink/40 transition sm:hidden ${open ? 'visible opacity-100' : 'invisible opacity-0'}`} onClick={() => setOpen(false)}>
+                <div onClick={(e) => e.stopPropagation()} className={`absolute right-0 top-0 h-full w-[80%] max-w-xs bg-cream p-6 transition-transform ${open ? 'translate-x-0' : 'translate-x-full'}`}>
+                    <div className="mb-10 flex items-center justify-between">
+                        <Logo />
+                        <button onClick={() => setOpen(false)} aria-label="Close menu"><CloseIcon /></button>
+                    </div>
+                    <ul className="flex flex-col gap-1">
+                        {links.map((l) => (
+                            <li key={l.to}>
+                                <NavLink to={l.to} end={l.to === '/'} onClick={() => setOpen(false)} className="block border-b border-line py-4 font-display text-2xl [&.active]:text-rust">{l.label}</NavLink>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
-        </div>
+        </header>
     )
 }
 
 export default Navbar
-

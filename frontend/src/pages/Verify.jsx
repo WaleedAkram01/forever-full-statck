@@ -1,51 +1,45 @@
-// Jb verify payment hoo gii uss kyy liay yeh function hai brother.
-import React, { useContext, useEffect } from 'react'
-import { ShopContext } from '../context/ShopContext'
+import { useContext, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 import { toast } from 'react-toastify'
+import { ShopContext } from '../context/shop'
 
 const Verify = () => {
-
     const { navigate, token, setCartItems, backendUrl } = useContext(ShopContext)
-    const [searchParams, setSearchParams] = useSearchParams()
+    const [searchParams] = useSearchParams()
+    const ran = useRef(false)
 
-    const success = searchParams.get('success')
-    const orderId = searchParams.get('orderId')
-
-    const verifyPayment = async () => {
-        try {
-            if (!token) {
-                return null
-            }
-
-            // Backend URL update syntax logic complete kiya hai aur data objects pass kiye hain
-            const response = await axios.post(backendUrl + '/api/order/verifyStripe', { success, orderId }, { headers: { token } })
-
-            // Rememeber webhooks is a long procedure to implement what happend agrr hmmpayment prr gyy aur fail hoo tou /cart prr redirect krr dia hai hmm nyy.
-            // Agrr success hai tou /orders pages prr redirect krr dia hai 
-            // Remember:- Yhe sahi secure kkaam nhii yeh better approach thii stripe webhooks ka use kia jata but hmm ny nhii kia woo.
-            if (response.data.success) {
-                setCartItems({})
-                navigate('/orders') // Success par order page par le jaane ke liye
-            } else {
-                navigate('/cart') // Fail hone par cart par wapas bhejne ke liye
-            }
-
-        } catch (error) {
-            console.log(error)
-            toast.error("Payment verification failed. Please try again.")
-        }
-    }
-
-    // Is response function ko trigger karne ke liye useEffect code initialize kiya
     useEffect(() => {
+        if (!token || ran.current) return
+        ran.current = true
+        const verifyPayment = async () => {
+            try {
+                const { data } = await axios.post(
+                    backendUrl + '/api/order/verifyStripe',
+                    { success: searchParams.get('success'), orderId: searchParams.get('orderId') },
+                    { headers: { token } },
+                )
+                if (data.success) {
+                    setCartItems({})
+                    toast.success('Payment received. Thank you!')
+                    navigate('/orders')
+                } else {
+                    toast.info('Payment was cancelled. Your bag is still here.')
+                    navigate('/cart')
+                }
+            } catch {
+                toast.error('We could not confirm your payment. Please check your orders.')
+                navigate('/orders')
+            }
+        }
         verifyPayment()
-    }, [token])
+    }, [token, backendUrl, navigate, searchParams, setCartItems])
 
     return (
-        <div>
-            {/* Aap yahan ek loading spinner UI add kar sakte hain */}
+        <div className="container-page flex flex-col items-center py-32 text-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-2 border-line border-t-rust" />
+            <p className="mt-6 font-display text-2xl">Confirming your payment…</p>
+            <p className="mt-2 text-sm text-muted">Please don’t close this page.</p>
         </div>
     )
 }

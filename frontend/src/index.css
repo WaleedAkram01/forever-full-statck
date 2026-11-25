@@ -1,34 +1,29 @@
-/* It is  copied from google fonts */
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Prata&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-a.active hr {
-  display: block;
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-cream text-ink font-sans antialiased; }
+  h1, h2, h3 { @apply font-display; }
+  ::selection { @apply bg-rust text-white; }
 }
 
-* {
-  font-family: "Outfit";
+@layer components {
+  .container-page { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 bg-ink px-7 py-3.5 text-sm font-medium tracking-wide text-white transition hover:bg-rust disabled:cursor-not-allowed disabled:opacity-60; }
+  .btn-outline { @apply inline-flex items-center justify-center gap-2 border border-ink px-7 py-3.5 text-sm font-medium tracking-wide transition hover:bg-ink hover:text-white; }
+  .input { @apply w-full border border-line bg-white px-4 py-3 text-sm outline-none transition placeholder:text-muted/70 focus:border-ink; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-widest2 text-rust; }
+  .card { @apply border border-line bg-white; }
+  .nav-link.active span { @apply w-full; }
 }
 
-/* It is also from google fonts */
-.prata-regular {
-  font-family: "Prata", serif;
-  font-weight: 400;
-  font-style: normal;
-}
+/* Hide scrollbars on horizontal thumbnail strips only */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
 
-/* For mobile screen if we wanna know o which page are we */
-@media (max-width: 640px) {
-  a.active {
-    background-color: black;
-    color: white;
-  }
-}
-
-/* This sis for Product.jsx hota kia scrolbar side products kyy  liay show h rhii thii  */
-::-webkit-scrollbar {
-  display: none;
-}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton { @apply relative overflow-hidden bg-sand; }
+.skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); animation: shimmer 1.4s infinite; }

@@ -1,75 +1,78 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { ShopContext } from '../context/ShopContext'
-import Title from '../components/Title';
-import { assets } from '../assets/assets';
-import CartTotal from '../components/CartTotal';
+import { useContext, useMemo } from 'react'
+import { Link } from 'react-router-dom'
+import { ShopContext } from '../context/shop'
+import CartTotal from '../components/CartTotal'
+import { BagIcon, TrashIcon } from '../components/Icons'
+
 const Cart = () => {
+    const { products, cartItems, updateQuantity, navigate, formatPrice, token } = useContext(ShopContext)
 
-    const { products, currency, cartItems, updateQuantity, navigate } = useContext(ShopContext);
-    const [cartData, setCartData] = useState([]);
-
-
-    useEffect(() => {
-        if (products.length > 0) {
-            const tempData = [];
-            for (const items in cartItems) {
-                for (const item in cartItems[items]) {
-                    if (cartItems[items][item] > 0) {
-                        tempData.push({
-                            _id: items,
-                            size: item,
-                            quantity: cartItems[items][item]
-                        })
-                    }
-                }
+    const lines = useMemo(() => {
+        const result = []
+        for (const id in cartItems) {
+            const product = products.find((p) => p._id === id)
+            if (!product) continue
+            for (const size in cartItems[id]) {
+                if (cartItems[id][size] > 0) result.push({ product, size, quantity: cartItems[id][size] })
             }
-            setCartData(tempData); // 💡 Added to save the processed items into state
         }
+        return result
+    }, [cartItems, products])
 
-    }, [cartItems, products]) // 💡 Added cartItems dependency to track cart updates
+    if (lines.length === 0) {
+        return (
+            <div className="container-page py-24 text-center">
+                <BagIcon size={40} className="mx-auto text-muted" />
+                <h1 className="mt-6 text-3xl font-medium">Your bag is empty</h1>
+                <p className="mt-2 text-muted">Find something you love and it will show up here.</p>
+                <Link to="/collection" className="btn-primary mt-8">Start shopping</Link>
+            </div>
+        )
+    }
 
     return (
-        <div className='border-t pt-14'>
-            <div className='text-2xl mb-3'>
-                <Title text1={'YOUR'} text2={'CART'} />
-            </div>
-            <div>
-                {
-                    cartData.map((item, index) => {
-                        const productData = products.find((product) => product._id === item._id);
-                        return (
-                            <div key={index} className='py-4 border-t border-b text-gray-700 grid grid-cols-[4fr_0.5fr_0.5fr] sm:grid-cols-[4fr_2fr_1fr] items-center gap-4'>
-                                <div className='flex items-start gap-6'>
-                                    <img className='w-16 sm:w-20' src={productData.image[0]} alt="" />
+        <div className="container-page pt-10">
+            <h1 className="text-4xl font-medium">Your bag</h1>
+            <div className="mt-10 grid gap-12 lg:grid-cols-[1fr_380px]">
+                <ul className="divide-y divide-line border-y border-line">
+                    {lines.map(({ product, size, quantity }) => (
+                        <li key={product._id + size} className="flex gap-5 py-6">
+                            <Link to={`/product/${product._id}`} className="w-24 flex-shrink-0 bg-sand sm:w-28">
+                                <img src={product.image[0]} alt={product.name} className="aspect-[4/5] w-full object-cover" />
+                            </Link>
+                            <div className="flex flex-1 flex-col">
+                                <div className="flex justify-between gap-4">
                                     <div>
-                                        <p className='text-xs sm:text-lg font-medium'>{productData.name}</p>
-                                        <div className='flex items-center gap-5 mt-2'>
-                                            <p>{currency}{productData.price}</p>
-                                            <p className='px-2 sm:px-3 sm:py-1 border bg-slate-50'>{item.size}</p>
-                                        </div>
+                                        <Link to={`/product/${product._id}`} className="font-medium hover:text-rust">{product.name}</Link>
+                                        <p className="mt-1 text-sm text-muted">Size {size} · {formatPrice(product.price)}</p>
                                     </div>
+                                    <p className="font-semibold">{formatPrice(product.price * quantity)}</p>
                                 </div>
-                                {/* OnChange iss liay lagaaya kyy na every prr liek aik product ki 3 quanty tou w oo 1 hi shwo krta thaa halakyy 3 hoti thii uss kyy liay hai yeh  */}
-                                {/* And min =1 iss liay kyy na inpit mai value 1 show hoo */}
-                                <input onChange={(e) => e.target.value === '' || e.target.value === '0' ? null : updateQuantity(item._id, item.size, Number(e.target.value))} className='border max-w-10 sm:max-w-20 px-1 sm:px-2 py-1' type="number" min={1} defaultValue={item.quantity} />
-                                {/* purpose of onclick is that when clicked, it will update the quantity of the item in the cart to 0 (effectively removing it) */}
-                                <img onClick={() => updateQuantity(item._id, item.size, 0)} className='w-4 mr-4 sm:w-5 cursor-pointer' src={assets.bin_icon} alt="" />
+                                <div className="mt-auto flex items-center justify-between pt-4">
+                                    <div className="flex items-center border border-line bg-white">
+                                        <button onClick={() => updateQuantity(product._id, size, quantity - 1)} className="h-9 w-9 text-lg hover:bg-sand" aria-label="Decrease">−</button>
+                                        <span className="w-8 text-center text-sm">{quantity}</span>
+                                        <button onClick={() => updateQuantity(product._id, size, Math.min(quantity + 1, 20))} className="h-9 w-9 text-lg hover:bg-sand" aria-label="Increase">+</button>
+                                    </div>
+                                    <button onClick={() => updateQuantity(product._id, size, 0)} className="flex items-center gap-1.5 text-sm text-muted hover:text-rust">
+                                        <TrashIcon size={16} /> Remove
+                                    </button>
+                                </div>
                             </div>
-                        )
-                    })
-                }
-            </div>
-            <div className='flex justify-end my-20'>
-                <div className='w-full sm:w-[450px]'>
+                        </li>
+                    ))}
+                </ul>
+
+                <aside className="card h-fit p-6">
                     <CartTotal />
-                    <div className='w-full text-end'>
-                        <button className='bg-black text-white text-sm my-8 px-8 py-3' onClick={() => navigate('/place-order')}>
-                            PROCEED TO CHECKOUT
-                        </button>
-                    </div>
-                </div>
+                    <button onClick={() => navigate(token ? '/place-order' : '/login?next=/place-order')} className="btn-primary mt-6 w-full">
+                        {token ? 'Checkout' : 'Sign in to checkout'}
+                    </button>
+                    <p className="mt-4 text-center text-xs text-muted">Cash on delivery and card payments accepted</p>
+                </aside>
             </div>
         </div>
     )
 }
+
 export default Cart

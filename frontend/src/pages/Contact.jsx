@@ -1,33 +1,34 @@
-import React from 'react'
-import Title from '../components/Title'
-import { assets } from '../assets/assets'
-import NewsLetterBox from '../components/NewsLetterBox'
+import contactImg from '../assets/contact_store.jpg'
 
-const Contact = () => {
-    return (
+const Contact = () => (
+    <section className="container-page grid items-center gap-12 pt-12 md:grid-cols-2 lg:gap-20">
         <div>
-            <div className='text-center text-2xl pt-10 border-t'>
-                <Title text1={'CONTACT'} text2={'US'} />
-            </div>
+            <p className="eyebrow">Contact</p>
+            <h1 className="mt-4 text-4xl font-medium leading-tight sm:text-5xl">We’re here to help.</h1>
+            <p className="mt-4 max-w-md leading-relaxed text-muted">Questions about sizing, an order or an exchange? Reach out and a real person will get back to you within one working day.</p>
 
-            <div className='my-10 flex flex-col justify-center md:flex-row gap-10 mb-28'>
-                <img className='w-full md:max-w-[480px]' src={assets.contact_img} alt="" />
-
-                <div className='flex flex-col justify-center items-start gap-6'>
-                    <p className='font-semibold text-xl text-gray-600'>Our Store</p>
-                    <p className='text-gray-500'>54709 Willms Station <br /> Suite 350, Washington, USA</p>
-                    <p className='text-gray-500'>Tel: (415) 555-0132 <br /> Email: admin@forever.com</p>
-                    <p className='font-semibold text-xl text-gray-600'>Careers at Forever</p>
-                    <p className='text-gray-500'>Learn more about our teams and job openings.</p>
-                    <button className='border border-black px-8 py-4 text-sm hover:bg-black hover:text-white transition-all duration-500'>
-                        Explore Jobs
-                    </button>
+            <dl className="mt-10 grid gap-8 sm:grid-cols-2">
+                <div>
+                    <dt className="eyebrow text-ink">Studio</dt>
+                    <dd className="mt-3 text-sm leading-relaxed text-muted">Main Boulevard, Gulberg III<br />Lahore, Pakistan</dd>
                 </div>
-            </div>
-
-            <NewsLetterBox />
+                <div>
+                    <dt className="eyebrow text-ink">Hours</dt>
+                    <dd className="mt-3 text-sm leading-relaxed text-muted">Monday to Saturday<br />10am to 7pm</dd>
+                </div>
+                <div>
+                    <dt className="eyebrow text-ink">Email</dt>
+                    <dd className="mt-3 text-sm text-muted">hello@kapra.store</dd>
+                </div>
+                <div>
+                    <dt className="eyebrow text-ink">Orders</dt>
+                    <dd className="mt-3 text-sm text-muted">Track yours under <a href="/orders" className="underline underline-offset-4">My orders</a></dd>
+                </div>
+            </dl>
+            <p className="mt-10 text-xs text-muted">Kapra is a portfolio demo store. Contact details are placeholders.</p>
         </div>
-    )
-}
+        <img src={contactImg} alt="Inside the Kapra studio" className="aspect-[4/5] w-full object-cover" />
+    </section>
+)
 
 export default Contact

@@ -1,33 +1,36 @@
-// We will add this middleWare where we will require admin permission.
-// Means in the API of creating product, delete,edit or other stuff.
-
 import jwt from "jsonwebtoken";
 
-const adminAuth = async (req, res, next) => {
-  try {
-    const { token } = req.headers;
+// Verifies the admin token. Two roles exist:
+// - "admin": full access
+// - "demo":  read-only access (for portfolio visitors), blocked from any write route
+const adminAuth = (options = {}) => {
+  const { allowDemo = false } = options;
 
-    // If no token is provided
-    if (!token) {
-      return res.json({
-        success: false,
-        message: "Not Authorized Login Again",
-      });
-    }
+  return (req, res, next) => {
+    try {
+      const { token } = req.headers;
+      if (!token) {
+        return res.status(401).json({ success: false, message: "Not authorized. Please log in again." });
+      }
 
-    const token_decode = jwt.verify(token, process.env.JWT_SECRET);
-    if (token_decode !== process.env.ADMIN_EMAIL + process.env.ADMIN_PASSWORD) {
-      return res.json({
-        success: false,
-        message: "Not Authorized Login Again",
-      });
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (!decoded || (decoded.role !== "admin" && decoded.role !== "demo")) {
+        return res.status(401).json({ success: false, message: "Not authorized. Please log in again." });
+      }
+
+      if (decoded.role === "demo" && !allowDemo) {
+        return res.status(403).json({
+          success: false,
+          message: "Demo mode is read-only. Changes are disabled for the demo account.",
+        });
+      }
+
+      req.adminRole = decoded.role;
+      next();
+    } catch {
+      return res.status(401).json({ success: false, message: "Session expired. Please log in again." });
     }
-    // If verified then proceed to next.
-    next();
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
-  }
+  };
 };
 
 export default adminAuth;

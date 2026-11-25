@@ -2,7 +2,6 @@ import express from "express";
 import {
   placeOrder,
   placeOrderStripe,
-  // placeOrderRazorpay,
   allOrders,
   userOrders,
   updateStatus,
@@ -10,21 +9,19 @@ import {
 } from "../controllers/orderController.js";
 import authUser from "../middlewares/auth.js";
 import adminAuth from "../middlewares/adminAuth.js";
+
 const orderRouter = express.Router();
 
-// Admin Features
-orderRouter.post("/list", adminAuth, allOrders);
-orderRouter.post("/status", adminAuth, updateStatus);
+// Admin (the read-only demo admin can view orders but not change them)
+orderRouter.post("/list", adminAuth({ allowDemo: true }), allOrders);
+orderRouter.post("/status", adminAuth(), updateStatus);
 
-// Payment Features
+// Checkout
 orderRouter.post("/place", authUser, placeOrder);
 orderRouter.post("/stripe", authUser, placeOrderStripe);
-// orderRouter.post("/razorpay", authUser, placeOrderRazorpay);
-
-// User Feature
-orderRouter.post("/userorders", authUser, userOrders);
-
-// Verify Stripe Payment
 orderRouter.post("/verifyStripe", authUser, verifyStripe);
+
+// Customer
+orderRouter.post("/userorders", authUser, userOrders);
 
 export default orderRouter;

@@ -1,2 +1,5 @@
 node_modules
 *.env
+dist
+backend/scripts/
+*.log

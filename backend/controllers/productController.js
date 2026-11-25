@@ -1,142 +1,100 @@
 import { v2 as cloudinary } from "cloudinary";
 import { productModel } from "../models/productModel.js";
 
-// We will make 4 controler functions here
-// -create product , -getAllproduct, -getSingleProduct, -remove product
-// function for add product
+const CATEGORIES = ["Men", "Women", "Kids"];
+const SUB_CATEGORIES = ["Topwear", "Bottomwear", "Winterwear"];
+const SIZES = ["S", "M", "L", "XL", "XXL"];
 
-// What we learnt in this function:-
-// To handle Images through multer and other stuff .
+// Extracts "folder/name" from a Cloudinary URL so the image can be deleted with the product
+const publicIdFromUrl = (url) => {
+  const match = String(url).match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z0-9]+$/i);
+  return match ? match[1] : null;
+};
+
 const addProduct = async (req, res) => {
-  // To add a product
-  // We will create a middleWare using multer here so if we pass any file using formData it should pass through multer.
   try {
-    const {
-      name,
-      description,
-      price,
-      category,
-      subCategory,
-      sizes,
-      bestseller,
-    } = req.body;
-    // Purpose of && yeh hai kyy agar image1 exist krta hai tou hi uss ki value ko image1 mai daal do warna undefined daal do.
-    //req.files.image1 && req.files.image1[0] — yeh ek safety check hai: "agar image1 mojood hai (&&), tabhi usay lo." Kyunki ho sakta admin ne sirf 2 images di hon, 4 nahi. (Bina is check ke undefined pe crash hota.)
-    const image1 = req.files.image1 && req.files.image1[0];
-    const image2 = req.files.image2 && req.files.image2[0];
-    const image3 = req.files.image3 && req.files.image3[0];
-    const image4 = req.files.image4 && req.files.image4[0];
+    const { name, description, price, category, subCategory, sizes, bestseller } = req.body;
 
-    // Yeh iss liay bcz  all 4 images mai syy joo upload nhii hoti thii woo undefined show krta thaa.
-    //  hmm chchty hain sirf joo uplaod woo iss varbale mai aa jai.
+    const parsedSizes = JSON.parse(sizes || "[]");
+    const numericPrice = Number(price);
+    if (!name?.trim() || !description?.trim()) throw new Error("Name and description are required");
+    if (!Number.isFinite(numericPrice) || numericPrice <= 0) throw new Error("Enter a valid price");
+    if (!CATEGORIES.includes(category) || !SUB_CATEGORIES.includes(subCategory)) throw new Error("Invalid category");
+    if (!Array.isArray(parsedSizes) || parsedSizes.length === 0 || parsedSizes.some((s) => !SIZES.includes(s))) {
+      throw new Error("Select at least one size");
+    }
 
-    const images = [image1, image2, image3, image4].filter(
-      (item) => item !== undefined,
-    );
-    //  SEE IN BLOOGER REGARDING THIS QUESTION:-14
-    let imagesUrl = await Promise.all(
-      images.map(async (item) => {
-        // item.path --->.path idhar na joo multer temporary iMage save krta hai woo hmm ab cloudianry mai uplaod karain gyy AUR then woo URL daii ga cludinary ga jisy DB mai save krwaa lain gy.
-        let result = await cloudinary.uploader.upload(item.path, {
-          resource_type: "image",
-        });
+    const images = ["image1", "image2", "image3", "image4"]
+      .map((key) => req.files?.[key]?.[0])
+      .filter(Boolean);
+    if (images.length === 0) throw new Error("Upload at least one image");
+
+    const imagesUrl = await Promise.all(
+      images.map(async (file) => {
+        const result = await cloudinary.uploader.upload(file.path, { resource_type: "image", folder: "kapra/products" });
         return result.secure_url;
       }),
     );
 
-    const productData = {
-      name,
-      description,
+    await productModel.create({
+      name: name.trim(),
+      description: description.trim(),
       category,
-      // Frontend syy data strng kii form mai aata hai iss liay hmm ussay number mai convert krwa lain gy.
-      // As DB mai hmm number ki form proceas nuber store krwain gy
-      price: Number(price),
       subCategory,
-      // bestSeller boolean hai iss liay true ya false save krwain gy
-      bestseller: bestseller === "true" ? true : false,
-      //   JSON.parse iss liay bcz string ki form mai data ko object ya array ki form mai convert krr sakain hmm.
-      sizes: JSON.parse(sizes),
+      price: numericPrice,
+      bestseller: bestseller === "true",
+      sizes: parsedSizes,
       image: imagesUrl,
       date: Date.now(),
-    };
-    console.log(productData);
+    });
 
-    // Waleed undefined 100 Mens topwear ["M"] true
-    console.log(
-      name,
-      description,
-      price,
-      category,
-      subCategory,
-      sizes,
-      bestseller,
-    );
-
-    console.log(imagesUrl);
-    /*  [
-  'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
-  'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
-  'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
-  'https://res.cloudinary.com/dyaqjxqtd/image/upload/v178137
-] */
-
-    const product = new productModel(productData);
-    await product.save();
-
-    res.json({ success: true, message: "Product Added" });
+    res.json({ success: true, message: "Product added" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// fucnction for list product
 const listProducts = async (req, res) => {
   try {
-    const products = await productModel.find();
-    res.status(200).json({
-      success: true,
-      products,
-    });
+    const products = await productModel.find().sort({ date: -1 });
+    res.json({ success: true, products });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Could not load products" });
   }
 };
 
-// function for removing product
-// Product differnet ways syy del hoo skti hai But hmm req.body syy delete karain gyy brother.
 const removeProduct = async (req, res) => {
   try {
-    const { id } = req.body;
-
-    // 1. findByIdAndDelete use karein aur await lagayein
-    const product = await productModel.findByIdAndDelete(id);
-
-    // 2. Check karein agar product database mai mila hi nahi
+    const product = await productModel.findByIdAndDelete(req.body.id);
     if (!product) {
-      return res.status(404).json({ message: "Product not found" });
+      return res.status(404).json({ success: false, message: "Product not found" });
     }
 
-    res
-      .status(200)
-      .json({ success: true, message: "Product deleted successfully" });
+    // Clean up the product's images in Cloudinary (failures here don't block the delete)
+    await Promise.all(
+      product.image.map((url) => {
+        const publicId = publicIdFromUrl(url);
+        return publicId ? cloudinary.uploader.destroy(publicId).catch(() => null) : null;
+      }),
+    );
+
+    res.json({ success: true, message: "Product deleted" });
   } catch (error) {
-    console.log(error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Could not delete product" });
   }
 };
 
-// function for single product info
 const singleProduct = async (req, res) => {
   try {
-    const { productId } = req.body;
-    const product = await productModel.findById(productId);
+    const product = await productModel.findById(req.body.productId);
+    if (!product) return res.status(404).json({ success: false, message: "Product not found" });
     res.json({ success: true, product });
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+  } catch {
+    res.status(400).json({ success: false, message: "Invalid product id" });
   }
 };
 
-export { addProduct, listProducts, removeProduct, singleProduct };
+export { addProduct, listProducts, removeProduct, singleProduct, publicIdFromUrl };

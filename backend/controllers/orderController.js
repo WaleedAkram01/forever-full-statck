@@ -1,175 +1,204 @@
+import Stripe from "stripe";
+import mongoose from "mongoose";
 import { orderModel } from "../models/orderModel.js";
 import { userModel } from "../models/userModel.js";
-import Stripe from "stripe";
+import { productModel } from "../models/productModel.js";
 
-// global variables for stripe payment
-const currency = "PKR";
-const deliveryCharge = 10;
-//gateway initialization
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+const currency = "pkr";
+export const DELIVERY_FEE = 250;
+const stripe = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
 
-// Placing orders using COD Method
-// Agrr user nyy paymnet method mai COD select kia hai tou uss case mai yeh API call hogi aur order place hoga.
+const ORDER_STATUSES = ["Order Placed", "Packing", "Shipped", "Out for delivery", "Delivered", "Cancelled"];
+const ADDRESS_FIELDS = ["firstName", "lastName", "email", "street", "city", "state", "zipcode", "country", "phone"];
+
+// Never trust prices or totals sent by the browser: rebuild the order from the database.
+const buildOrderItems = async (rawItems) => {
+  if (!Array.isArray(rawItems) || rawItems.length === 0) {
+    throw new Error("Your cart is empty");
+  }
+
+  const ids = [...new Set(rawItems.map((i) => String(i?._id)))].filter((id) => mongoose.isValidObjectId(id));
+  const products = await productModel.find({ _id: { $in: ids } });
+  const byId = new Map(products.map((p) => [String(p._id), p]));
+
+  const items = [];
+  let subtotal = 0;
+  for (const raw of rawItems) {
+    const product = byId.get(String(raw?._id));
+    const quantity = Number.parseInt(raw?.quantity, 10);
+    if (!product) throw new Error("A product in your cart is no longer available");
+    if (!product.sizes.includes(raw.size)) throw new Error(`Size ${raw.size} is not available for ${product.name}`);
+    if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) throw new Error("Invalid quantity");
+
+    items.push({
+      _id: String(product._id),
+      name: product.name,
+      price: product.price,
+      image: product.image.slice(0, 1),
+      category: product.category,
+      size: raw.size,
+      quantity,
+    });
+    subtotal += product.price * quantity;
+  }
+  return { items, amount: subtotal + DELIVERY_FEE };
+};
+
+const cleanAddress = (address = {}) => {
+  const clean = {};
+  for (const field of ADDRESS_FIELDS) {
+    const value = String(address[field] ?? "").trim();
+    if (!value) throw new Error("Please fill in all delivery details");
+    clean[field] = value.slice(0, 120);
+  }
+  return clean;
+};
+
 const placeOrder = async (req, res) => {
   try {
-    // This userId is from token decode. And items, amount, address are from request body that user will send when placing order.
-    const { userId, items, amount, address } = req.body;
+    const { userId, items: rawItems, address } = req.body;
+    const { items, amount } = await buildOrderItems(rawItems);
 
-    // Ab hum nyy order data ko create krain gy aur usko database mai save kr den gy.
-    const orderData = {
+    await orderModel.create({
       userId,
       items,
-      address,
+      address: cleanAddress(address),
       amount,
       paymentMethod: "COD",
       payment: false,
       date: Date.now(),
-    };
-    // Ab hum nyy orderData create kr diya hai tou usko database mai save kr den gy.
-    const newOrder = new orderModel(orderData);
-    await newOrder.save();
-
-    // Clears the user's cart data after successfully placing the order
+    });
     await userModel.findByIdAndUpdate(userId, { cart: {} });
 
-    res.json({ success: true, message: "Order Placed" });
+    res.json({ success: true, message: "Order placed" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// Placing orders using Stripe Method
 const placeOrderStripe = async (req, res) => {
   try {
-    // This userId is from token decode. And items, amount, address are from request body that user will send when placing order.
-    const { userId, items, amount, address } = req.body;
-    // Yeh origin basically na kya hai kyy na user ka domain name hai jahan syy user nyy request bheji hai. Agrr user nyy apne website syy request bheji hai tou origin mai uska domain name hoga aur agrr user nyy postman syy request
-    // Like abhii frontend syy basicalay krty  tou origin mai localhost:5173 aay ga.
+    if (!stripe) throw new Error("Card payments are not configured");
+    const { userId, items: rawItems, address } = req.body;
     const { origin } = req.headers;
-    const orderData = {
+    const { items, amount } = await buildOrderItems(rawItems);
+
+    const order = await orderModel.create({
       userId,
       items,
-      address,
+      address: cleanAddress(address),
       amount,
       paymentMethod: "Stripe",
       payment: false,
       date: Date.now(),
-    };
-    // Ab hum nyy orderData create kr diya hai tou usko database mai save kr den gy.
-    const newOrder = new orderModel(orderData);
-    await newOrder.save();
+    });
 
-    // After placing the order we would create line items using that we can execue stripe payment
     const line_items = items.map((item) => ({
       price_data: {
-        currency: currency,
-        product_data: {
-          name: item.name,
-        },
-        // multily byy 100 because stripe only accept amount in cents
-        //e.g if price is 1000 tou stripe mai usko 100000 cents mai convert krnyy kyy liay multiply by 100 kia hai.
+        currency,
+        product_data: { name: `${item.name} (${item.size})` },
         unit_amount: item.price * 100,
       },
       quantity: item.quantity,
     }));
-
     line_items.push({
-      price_data: {
-        currency: currency,
-        product_data: {
-          name: "Delivery Charges",
-        },
-        unit_amount: deliveryCharge * 100,
-      },
+      price_data: { currency, product_data: { name: "Delivery" }, unit_amount: DELIVERY_FEE * 100 },
       quantity: 1,
     });
+
     const session = await stripe.checkout.sessions.create({
-      success_url: `${origin}/verify?success=true&orderId=${newOrder._id}`,
-      cancel_url: `${origin}/verify?success=false&orderId=${newOrder._id}`,
+      success_url: `${origin}/verify?success=true&orderId=${order._id}`,
+      cancel_url: `${origin}/verify?success=false&orderId=${order._id}`,
       line_items,
       mode: "payment",
+      metadata: { orderId: String(order._id) },
     });
+
+    order.stripeSessionId = session.id;
+    await order.save();
 
     res.json({ success: true, session_url: session.url });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// AB jb payment successfully agrr hoo gii ou redrect kryy ga
-// Ab check krnyy kyy liay either succesfull payyment hui hai yaa nhii.
-// Iss kyy liay aik controller function
-// Verify Stripe
+// Confirms payment with Stripe itself instead of trusting the "success" query parameter.
 const verifyStripe = async (req, res) => {
-  const { orderId, success, userId } = req.body;
-
   try {
-    if (success === "true") {
-      await orderModel.findByIdAndUpdate(orderId, { payment: true });
-      await userModel.findByIdAndUpdate(userId, { cartData: {} });
-      res.json({ success: true });
-    } else {
-      await orderModel.findByIdAndDelete(orderId);
-      res.json({ success: false });
+    const { orderId, success, userId } = req.body;
+    if (!mongoose.isValidObjectId(orderId)) {
+      return res.status(400).json({ success: false, message: "Invalid order" });
     }
+
+    const order = await orderModel.findOne({ _id: orderId, userId });
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    if (order.payment) return res.json({ success: true });
+
+    let paid = false;
+    if (success === "true" && stripe && order.stripeSessionId) {
+      const session = await stripe.checkout.sessions.retrieve(order.stripeSessionId);
+      paid = session.payment_status === "paid";
+    }
+
+    if (paid) {
+      order.payment = true;
+      await order.save();
+      await userModel.findByIdAndUpdate(userId, { cart: {} });
+      return res.json({ success: true });
+    }
+
+    await orderModel.deleteOne({ _id: orderId, payment: false });
+    return res.json({ success: false, message: "Payment was not completed" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Could not verify payment" });
   }
 };
 
-// Placing orders using Razorpay Method
-// const placeOrderRazorpay = async (req, res) => {};
+const maskAddress = (address = {}) => ({
+  ...address,
+  lastName: address.lastName ? `${String(address.lastName)[0]}.` : "",
+  email: "hidden@demo",
+  street: "Hidden in demo mode",
+  phone: "•••• •••••••",
+  zipcode: "•••••",
+});
 
-// *********************************
-// All Orders data for Admin Panel
-// Admin Panel mai hum nyy ek page banaya hai jismein admin apne store ke sare orders dekh sakta hai aur unka status update kar sakta hai. Tou iss page ke liye yeh API call hogi jismein admin apne store ke sare orders ka data fetch kar sakta hai.
 const allOrders = async (req, res) => {
   try {
-    const orders = await orderModel.find({});
-    res.json({ success: true, orders });
+    const orders = await orderModel.find({}).sort({ date: -1 }).lean();
+    const result = req.adminRole === "demo" ? orders.map((o) => ({ ...o, address: maskAddress(o.address) })) : orders;
+    res.json({ success: true, orders: result });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Could not load orders" });
   }
 };
 
-// User Order Data For Forntend
-// Purpose of this API is that when user place an order tou usko apne orders ka data dikhe jismein uske sare orders ka data show ho aur usko apne orders ka status bhi pata chale.
 const userOrders = async (req, res) => {
   try {
     const { userId } = req.body;
-
-    const orders = await orderModel.find({ userId });
+    const orders = await orderModel.find({ userId }).sort({ date: -1 });
     res.json({ success: true, orders });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Could not load your orders" });
   }
 };
 
-// update order status
-// Admin Panel mai admin apne store ke orders ka status update kar sakta hai. Tou iss API call se admin apne store ke orders ka status update kar sakta hai.
 const updateStatus = async (req, res) => {
   try {
     const { orderId, status } = req.body;
-
+    if (!ORDER_STATUSES.includes(status)) {
+      return res.status(400).json({ success: false, message: "Invalid status" });
+    }
     await orderModel.findByIdAndUpdate(orderId, { status });
-    res.json({ success: true, message: "Status Updated" });
+    res.json({ success: true, message: "Status updated" });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Could not update status" });
   }
 };
 
-export {
-  placeOrder,
-  placeOrderStripe,
-  // placeOrderRazorpay,
-  allOrders,
-  userOrders,
-  updateStatus,
-  verifyStripe,
-};
+export { placeOrder, placeOrderStripe, allOrders, userOrders, updateStatus, verifyStripe };

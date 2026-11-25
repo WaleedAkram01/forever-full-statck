@@ -3,128 +3,97 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { userModel } from "../models/userModel.js";
 
-const createToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET);
-};
+const createToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-// Route for user login
+// Read-only demo admin, so the admin panel can be shown safely in a portfolio.
+// Override with DEMO_ADMIN_EMAIL / DEMO_ADMIN_PASSWORD, or disable with DEMO_ADMIN_ENABLED=false.
+const DEMO_EMAIL = process.env.DEMO_ADMIN_EMAIL || "demo@kapra.store";
+const DEMO_PASSWORD = process.env.DEMO_ADMIN_PASSWORD || "demo1234";
+const demoEnabled = process.env.DEMO_ADMIN_ENABLED !== "false";
+
+if (process.env.ADMIN_PASSWORD && process.env.ADMIN_PASSWORD.length < 12) {
+  console.warn("[security] ADMIN_PASSWORD is shorter than 12 characters. Set a strong value in your environment.");
+}
+
 const login = async (req, res) => {
-  const { email, password } = req.body;
   try {
     const { email, password } = req.body;
-
-    const user = await userModel.findOne({ email });
-
-    if (!user) {
-      return res.json({ success: false, message: "User doesn't exists" });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "Email and password are required" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const user = await userModel.findOne({ email: String(email).toLowerCase().trim() });
+    const isMatch = user ? await bcrypt.compare(password, user.password) : false;
 
-    if (isMatch) {
-      const token = createToken(user._id);
-      res.json({ success: true, token });
-    } else {
-      res.json({ success: false, message: "Invalid credentials" });
-    }
-  } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: error.message });
-  }
-};
-// Route for user registration
-const registration = async (req, res) => {
-  try {
-    // data aaya frontend syy
-    const { name, email, password } = req.body;
-
-    // Check if user already exists then error de do.
-    const exists = await userModel.findOne({ email });
-    if (exists) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: "Invalid email or password" });
     }
 
-    // validation of email and password using validator library
-    //Yeh code check karta hai ke user ne jo email enter kiya hai, kya woh sach mein aik sahi email address hai (jaise ali@gmail.com) ya bas fazool text hai.Agr galat jaisy yehan not operator hai ou error message dyy do Plz.
-    if (!validator.isEmail(email)) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Please enter a valid email" });
-    }
-
-    if (password.length < 8) {
-      return res.status(400).json({
-        success: false,
-        message: "Password must be at least 8 characters long",
-      });
-    }
-
-    // If email and password are both correct then
-    // For passord hashing we will use bcrypt library
-    // 10 level of sceurity ko bta-ta hai.
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Now,user would be ceated in database.
-    const user = new userModel({
-      name: name,
-      email: email,
-      password: hashedPassword,
-    });
-    // Ab jb user DB mai save hota hai dydefault _id key hoti hai uss mai.
-    await user.save();
-
-    // Ab joo user save kia thaa uss ki id sy hii token generate krwa lia
-    // Innterview Most Important Question: JWT Token kya hota hai? Iss ka benefit?See blogger
-
-    const token = createToken(user._id);
-    return res
-      .status(201)
-      .json({ success: true, message: "User registered successfully", token });
+    res.json({ success: true, token: createToken(user._id), name: user.name });
   } catch (error) {
     console.error(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
   }
 };
 
-// Route for admin login
-// Now ,here  we will create admin authentication system
-// First in .env add admin email and password
+const registration = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !String(name).trim()) {
+      return res.status(400).json({ success: false, message: "Please enter your name" });
+    }
+    if (!email || !validator.isEmail(String(email))) {
+      return res.status(400).json({ success: false, message: "Please enter a valid email" });
+    }
+    if (!password || String(password).length < 8) {
+      return res.status(400).json({ success: false, message: "Password must be at least 8 characters long" });
+    }
+
+    const normalizedEmail = String(email).toLowerCase().trim();
+    const exists = await userModel.findOne({ email: normalizedEmail });
+    if (exists) {
+      return res.status(409).json({ success: false, message: "An account with this email already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await userModel.create({
+      name: String(name).trim(),
+      email: normalizedEmail,
+      password: hashedPassword,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Account created",
+      token: createToken(user._id),
+      name: user.name,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
+  }
+};
+
 const adminLogin = async (req, res) => {
   try {
-    // Yeh user ny joo credentials enter kiay hain.
     const { email, password } = req.body;
 
-    // Matching credentials with our .env credentials
-    if (
-      email === process.env.ADMIN_EMAIL &&
-      password === process.env.ADMIN_PASSWORD
-    ) {
-      // If credentials match, then generate token (object ki tarah pass karna best hai)
-      const token = jwt.sign(email + password, process.env.JWT_SECRET);
-
-      return res.status(200).json({
-        success: true,
-        // Using this token we will authenticate our admin
-        // To authenticate we will make middleWare(adminAuth).
-        token,
-      });
-    } else {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials",
-      });
+    if (email && password && email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASSWORD) {
+      // The token only carries a role. It never contains the credentials.
+      const token = jwt.sign({ role: "admin" }, process.env.JWT_SECRET, { expiresIn: "1d" });
+      return res.json({ success: true, token, role: "admin" });
     }
+
+    if (demoEnabled && email === DEMO_EMAIL && password === DEMO_PASSWORD) {
+      const token = jwt.sign({ role: "demo" }, process.env.JWT_SECRET, { expiresIn: "1d" });
+      return res.json({ success: true, token, role: "demo" });
+    }
+
+    return res.status(401).json({ success: false, message: "Invalid credentials" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    console.error(error);
+    return res.status(500).json({ success: false, message: "Something went wrong. Please try again." });
   }
 };
 

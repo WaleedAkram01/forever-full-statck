@@ -158,6 +158,7 @@ const verifyStripe = async (req, res) => {
 
 const maskAddress = (address = {}) => ({
   ...address,
+  firstName: address.firstName ? `${String(address.firstName)[0]}.` : "",
   lastName: address.lastName ? `${String(address.lastName)[0]}.` : "",
   email: "hidden@demo",
   street: "Hidden in demo mode",

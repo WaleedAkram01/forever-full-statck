@@ -56,7 +56,7 @@ export default function Product() {
                             </button>
                         ))}
                     </div>
-                    <div className="flex-1 bg-sand">
+                    <div className="flex-1 self-start bg-sand">
                         <img src={image} alt={product.name} className="aspect-[4/5] w-full object-cover" />
                     </div>
                 </div>
